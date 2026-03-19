@@ -1,8 +1,74 @@
 </main> <footer class="main-footer">
-        <p>&copy; 2026 <%= firma_adi %> | Tüm hakları saklıdır.</p>
+        <div style="max-width:1200px; margin:0 auto; padding:40px 5%; display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:30px;">
+            <div>
+                <h3 style="font-family:'Space Grotesk',sans-serif; font-size:1.3rem; margin-bottom:12px; color:var(--text-main);">BAYİM<span style="color:var(--primary-accent);">.</span></h3>
+                <p style="font-size:14px; color:var(--text-gray); line-height:1.7;">En yeni akıllı telefonlar, aksesuarlar ve profesyonel servis hizmeti.</p>
+            </div>
+            <div>
+                <h4 style="font-size:14px; font-weight:700; margin-bottom:12px; color:var(--text-main);">Hızlı Linkler</h4>
+                <div style="display:flex; flex-direction:column; gap:8px; font-size:14px;">
+                    <a href="/urunler" style="color:var(--text-gray); transition:0.2s;">Cihazlar</a>
+                    <a href="/aksesuarlar" style="color:var(--text-gray); transition:0.2s;">Aksesuarlar</a>
+                    <a href="/servis" style="color:var(--text-gray); transition:0.2s;">Servis</a>
+                    <a href="/iletisim" style="color:var(--text-gray); transition:0.2s;">İletişim</a>
+                </div>
+            </div>
+            <div>
+                <h4 style="font-size:14px; font-weight:700; margin-bottom:12px; color:var(--text-main);">Sosyal Medya</h4>
+                <div style="display:flex; gap:12px; font-size:20px;">
+                    <a href="#" style="color:var(--text-gray); transition:0.2s;" title="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" style="color:var(--text-gray); transition:0.2s;" title="Facebook"><i class="fab fa-facebook"></i></a>
+                    <a href="#" style="color:var(--text-gray); transition:0.2s;" title="Twitter/X"><i class="fab fa-x-twitter"></i></a>
+                    <a href="#" style="color:var(--text-gray); transition:0.2s;" title="YouTube"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+        <div style="text-align:center; padding:20px; border-top:1px solid var(--border-color); font-size:13px; color:var(--text-gray);">
+            &copy; 2026 <%= firma_adi %> | Tüm hakları saklıdır.
+        </div>
     </footer>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
+    <!-- Scroll to Top Button -->
+    <div id="scrollToTop" style="position:fixed; bottom:100px; right:25px; width:45px; height:45px; background:var(--text-main); color:white; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; cursor:pointer; opacity:0; visibility:hidden; transition:0.3s; z-index:998; box-shadow:0 4px 10px rgba(0,0,0,0.2);"
+         title="Yukarı Çık">
+        <i class="fas fa-chevron-up"></i>
+    </div>
 
+    <!-- #15 WhatsApp Floating Button -->
+    <a href="https://wa.me/905551234567" target="_blank" rel="noopener"
+       style="position:fixed; bottom:25px; right:25px; width:60px; height:60px; background:#25D366; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:28px; box-shadow:0 4px 15px rgba(37,211,102,0.35); z-index:999; transition:transform 0.3s; text-decoration:none;"
+       onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"
+       title="WhatsApp'tan Yazın">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
+    <script>
+        // Scroll to Top Logic
+        const btnScrollTop = document.getElementById("scrollToTop");
+        window.addEventListener("scroll", () => {
+            if (window.scrollY > 300) {
+                btnScrollTop.style.opacity = "1";
+                btnScrollTop.style.visibility = "visible";
+            } else {
+                btnScrollTop.style.opacity = "0";
+                btnScrollTop.style.visibility = "hidden";
+            }
+        });
+        btnScrollTop.addEventListener("click", () => {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+
+        // Skeleton Loading Simulation
+        document.addEventListener("DOMContentLoaded", () => {
+            // Apply skeleton class to main elements temporarily for the aesthetic effect
+            const cards = document.querySelectorAll('.product-card, .service-card, .acc-card');
+            cards.forEach(card => card.classList.add('skeleton'));
+            
+            setTimeout(() => {
+                cards.forEach(card => card.classList.remove('skeleton'));
+            }, 600); // 600ms fake loading for visual feedback
+        });
+    </script>
 </body>
 </html>

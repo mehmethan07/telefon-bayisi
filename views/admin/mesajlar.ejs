@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mesajlar | <%= firma_adi %> Yönetim</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <%- include('partials/sidebar', { activePage: 'mesajlar' }) %>
+
+        <div class="admin-main">
+            <%- include('partials/topbar', { pageTitle: 'Mesajlar', pageIcon: 'fas fa-envelope', badgeCount: mesajlar.length }) %>
+
+            <% if (mesajlar.length === 0) { %>
+                <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <h3>Henüz mesaj yok</h3>
+                    <p>İletişim formundan gelen mesajlar burada görünecek.</p>
+                </div>
+            <% } else { %>
+                <div class="msg-list">
+                    <% mesajlar.slice().reverse().forEach(msg => { %>
+                        <div class="msg-card">
+                            <div class="msg-header">
+                                <div>
+                                    <span class="msg-sender"><%= msg.name %></span>
+                                    <span class="msg-subject"><%= msg.subject %></span>
+                                </div>
+                                <span class="msg-date"><%= msg.date %></span>
+                            </div>
+                            <p class="msg-body"><%= msg.message %></p>
+                            <div class="msg-meta">
+                                <span><i class="fas fa-envelope"></i> <%= msg.email %></span>
+                                <% if (msg.phone) { %>
+                                    <span><i class="fas fa-phone"></i> <%= msg.phone %></span>
+                                <% } %>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</body>
+</html>

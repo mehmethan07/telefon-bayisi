@@ -1,0 +1,190 @@
+<%- include('partials/header') %>
+
+<style>
+.breadcrumb { padding: 20px 5% 0 5%; max-width: 1200px; margin: 0 auto; color: var(--text-gray); font-size: 14px; }
+.breadcrumb a { color: var(--text-gray); text-decoration: none; transition: 0.2s; }
+.breadcrumb a:hover { color: var(--primary-accent); }
+.breadcrumb span { margin: 0 8px; font-size: 12px; }
+.breadcrumb .current { color: var(--text-main); font-weight: 500; }
+
+.gallery-thumbs { display: flex; gap: 10px; margin-top: 20px; }
+.thumb { width: 80px; height: 80px; border: 2px solid transparent; border-radius: 8px; cursor: pointer; transition: 0.2s; padding: 5px; background: white; }
+.thumb:hover { border-color: var(--border-color); }
+.thumb.active { border-color: var(--primary-accent); }
+.thumb img { width: 100%; height: 100%; object-fit: contain; }
+
+.detail-tabs { margin-top: 40px; border-bottom: 2px solid var(--border-color); display: flex; gap: 30px; }
+.tab-btn { background: none; border: none; font-size: 16px; font-weight: 600; color: var(--text-gray); cursor: pointer; padding-bottom: 12px; position: relative; font-family: 'Inter', sans-serif; transition: 0.3s; }
+.tab-btn:hover { color: var(--primary-accent); }
+.tab-btn.active { color: var(--primary-accent); }
+.tab-btn.active::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 100%; height: 2px; background: var(--primary-accent); }
+.tab-content { display: none; padding: 30px 0; font-size: 15px; line-height: 1.8; color: var(--text-gray); animation: fadeIn 0.4s ease; }
+.tab-content.active { display: block; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+
+<div class="breadcrumb">
+    <a href="/">Anasayfa</a> <span><i class="fas fa-chevron-right"></i></span>
+    <a href="/<%= type === 'urun' ? 'urunler' : 'aksesuarlar' %>"><%= type === 'urun' ? 'Cihazlar' : 'Aksesuarlar' %></a> <span><i class="fas fa-chevron-right"></i></span>
+    <a href="#" style="pointer-events:none;"><%= item.brand || item.category %></a> <span><i class="fas fa-chevron-right"></i></span>
+    <span class="current"><%= item.name %></span>
+</div>
+
+<section class="detail-section">
+    <div class="detail-grid">
+
+        <div class="detail-visual" style="display:flex; flex-direction:column; background:transparent; padding:0; border:none;">
+            <div style="background:var(--card-bg); padding:40px; border-radius:20px; border:1px solid var(--border-color); display:flex; justify-content:center; align-items:center; height:450px;">
+                <% if (item.image_url) { %>
+                    <img id="mainImage" src="<%= item.image_url %>" alt="<%= item.name %>" style="max-height:100%; object-fit:contain; transition:0.3s;">
+                <% } else if (item.icon) { %>
+                    <i class="<%= item.icon %>" style="font-size:120px; color:var(--primary-accent);"></i>
+                <% } else { %>
+                    <i class="fas fa-box-open" style="font-size:120px; color:var(--text-gray);"></i>
+                <% } %>
+            </div>
+            
+            <% if (item.image_url) { %>
+            <div class="gallery-thumbs">
+                <div class="thumb active" onclick="changeImage(this)"><img src="<%= item.image_url %>" alt="Açı 1"></div>
+                <!-- Mocking extra angles -->
+                <div class="thumb" onclick="changeImage(this)"><img src="<%= item.image_url %>" style="transform:scaleX(-1);" alt="Açı 2"></div>
+                <div class="thumb" onclick="changeImage(this)"><img src="<%= item.image_url %>" style="filter:grayscale(100%);" alt="Açı 3"></div>
+            </div>
+            <% } %>
+        </div>
+
+        <div class="detail-info">
+            <div class="detail-badge"><%= item.brand || item.category %></div>
+            <h1 class="detail-title"><%= item.name %></h1>
+
+            <div class="detail-price">
+                <%= item.price %> TL
+                <% if (item.stock_status) { %>
+                    <span class="detail-stock <%= item.stock_status === 'Stokta' ? 'stock-in' : 'stock-low' %>">
+                        <i class="fas <%= item.stock_status === 'Stokta' ? 'fa-check' : 'fa-exclamation-triangle' %>"></i> <%= item.stock_status %>
+                    </span>
+                <% } %>
+            </div>
+
+            <div class="detail-actions" style="display: flex; gap: 15px; margin-top:20px;">
+                <form action="/sepet/ekle" method="POST" style="flex: 3;">
+                    <input type="hidden" name="type" value="<%= type %>">
+                    <input type="hidden" name="id" value="<%= item.id %>">
+                    <button type="submit" class="btn-primary btn-add-cart" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; border: none; cursor: pointer; padding:16px;">
+                        <i class="fas fa-cart-shopping"></i> Sepete Ekle
+                    </button>
+                </form>
+                <button class="btn-primary" style="flex: 1; background:white; color:var(--text-main); border:1px solid var(--border-color); justify-content:center; transition:0.3s;" onmouseover="this.style.color='#ef4444'; this.style.borderColor='#ef4444'" onmouseout="this.style.color='var(--text-main)'; this.style.borderColor='var(--border-color)'"><i class="far fa-heart" style="font-size:20px;"></i></button>
+            </div>
+
+            <div class="features-grid" style="margin-top:30px;">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-truck-fast"></i></div>
+                    <div class="feature-text">
+                        <h4>Aynı Gün Kargo</h4>
+                        <p>16:00'a kadar sipariş verin</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-shield-halved"></i></div>
+                    <div class="feature-text">
+                        <h4>BAYİM Garantisi</h4>
+                        <p>Orijinal & Faturalı</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-arrow-rotate-left"></i></div>
+                    <div class="feature-text">
+                        <h4>Kolay İade</h4>
+                        <p>14 gün içinde koşulsuz</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-headset"></i></div>
+                    <div class="feature-text">
+                        <h4>Canlı Destek</h4>
+                        <p>7/24 Kesintisiz yardım</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- TABS -->
+            <div class="detail-tabs">
+                <button class="tab-btn active" onclick="openTab(event, 'desc')">Ürün Açıklaması</button>
+                <button class="tab-btn" onclick="openTab(event, 'specs')">Teknik Özellikler</button>
+                <button class="tab-btn" onclick="openTab(event, 'payment')">Taksit Seçenekleri</button>
+            </div>
+
+            <div id="desc" class="tab-content active">
+                <%= item.description || "Bu ürün hakkında detaylı açıklama yakında eklenecektir. En üstün kalite standartlarında üretilmiş ve BAYİM güvencesiyle sizlere sunulmaktadır. Orijinal kutusunda, garantili ve faturalı olarak teslim edilir. Uzun ömürlü kullanım ve yüksek performans sunar." %>
+            </div>
+            
+            <div id="specs" class="tab-content">
+                <ul style="list-style:none; padding:0;">
+                    <li style="padding:10px 0; border-bottom:1px solid var(--border-color); display:flex;"><strong style="width:150px; color:var(--text-main);">Marka:</strong> <%= item.brand || item.category %></li>
+                    <li style="padding:10px 0; border-bottom:1px solid var(--border-color); display:flex;"><strong style="width:150px; color:var(--text-main);">Model Yılı:</strong> 2024</li>
+                    <li style="padding:10px 0; border-bottom:1px solid var(--border-color); display:flex;"><strong style="width:150px; color:var(--text-main);">Garanti Süresi:</strong> 2 Yıl Türkiye Garantili</li>
+                    <li style="padding:10px 0; border-bottom:1px solid var(--border-color); display:flex;"><strong style="width:150px; color:var(--text-main);">Kutu İçeriği:</strong> Tam donanım orijinal paket</li>
+                </ul>
+            </div>
+            
+            <div id="payment" class="tab-content">
+                <p>Tüm kredi kartlarına peşin fiyatına 3, 6 veya 9 taksit imkanı sunulmaktadır. Havale/EFT ile yapılan ödemelerde ekstra <strong>%5 indirim</strong> sepetinizde otomatik olarak uygulanır.</p>
+                <img src="https://admin.paytr.com/assets/img/logo.svg" alt="PayTR" style="height:30px; margin-top:15px; filter:grayscale(100%); opacity:0.6;">
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+<script>
+function changeImage(el) {
+    document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    
+    const targetImageSrc = el.querySelector('img').src;
+    const targetTransform = el.querySelector('img').style.transform;
+    const targetFilter = el.querySelector('img').style.filter;
+    
+    const mainImg = document.getElementById('mainImage');
+    mainImg.style.opacity = 0;
+    setTimeout(() => {
+        mainImg.src = targetImageSrc;
+        mainImg.style.transform = targetTransform;
+        mainImg.style.filter = targetFilter;
+        mainImg.style.opacity = 1;
+    }, 200);
+}
+
+function openTab(evt, tabId) {
+    document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(tb => tb.classList.remove('active'));
+    
+    document.getElementById(tabId).classList.add('active');
+    evt.currentTarget.classList.add('active');
+}
+</script>
+
+<% if (typeof similarProducts !== 'undefined' && similarProducts.length > 0) { %>
+<section style="padding: 40px 5%; max-width: 1200px; margin: 0 auto;">
+    <h2 style="font-family:'Space Grotesk',sans-serif; font-size:1.6rem; margin-bottom:25px; color:var(--text-main);"><i class="fas fa-th-large" style="color:var(--primary-accent); margin-right:10px;"></i> Benzer Ürünler</h2>
+    <div class="services-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(250px, 1fr)); gap:20px;">
+        <% similarProducts.forEach(sp => { %>
+            <div class="service-card product-card" style="animation: fadeIn 0.4s ease;">
+                <div class="product-image-box">
+                    <img src="<%= sp.image_url %>" alt="<%= sp.name %>">
+                </div>
+                <span class="product-brand"><%= sp.brand %></span>
+                <h3 class="service-title product-name"><%= sp.name %></h3>
+                <p class="product-price"><%= sp.price %> TL</p>
+                <a href="/urunler/<%= sp.id %>" class="btn-primary">Detayları Gör</a>
+            </div>
+        <% }) %>
+    </div>
+</section>
+<% } %>
+
+<%- include('partials/footer') %>

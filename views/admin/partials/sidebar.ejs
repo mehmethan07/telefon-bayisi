@@ -1,0 +1,49 @@
+<aside class="admin-sidebar" id="adminSidebar">
+    <script>
+        // Sayfa yüklenmeden önce temayı uygula ki flash olmasın
+        if(localStorage.getItem('admin-theme') === 'dark') { document.body.classList.add('dark-mode'); }
+    </script>
+    <div class="sidebar-brand">
+        <h2>BAYİM<span>.</span></h2>
+        <p>Yönetim Paneli</p>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="/admin/dashboard" class="<%= activePage === 'dashboard' ? 'active' : '' %>"><i class="fas fa-chart-pie"></i> Özet</a>
+        <a href="/admin/siparisler" class="<%= activePage === 'siparisler' ? 'active' : '' %>"><i class="fas fa-shopping-bag"></i> Siparişler</a>
+        <a href="/admin/mesajlar" class="<%= activePage === 'mesajlar' ? 'active' : '' %>"><i class="fas fa-envelope"></i> Mesajlar</a>
+        <div class="sidebar-divider"></div>
+        <a href="/admin/urunler" class="<%= activePage === 'urunler' ? 'active' : '' %>"><i class="fas fa-mobile-screen"></i> Ürünler</a>
+        <a href="/admin/aksesuarlar" class="<%= activePage === 'aksesuarlar' ? 'active' : '' %>"><i class="fas fa-headphones"></i> Aksesuarlar</a>
+    </nav>
+    <div class="sidebar-footer" style="display:flex; flex-direction:column; gap:6px;">
+        <button id="themeToggleBtn" onclick="toggleTheme()" style="background:none; border:none; text-align:left; display:flex; align-items:center; gap:10px; padding:10px 15px; color:var(--text-light); border-radius:8px; font-size:13px; font-weight:500; cursor:pointer; width:100%; transition:0.2s;" onmouseover="this.style.background='var(--bg-sidebar-hover)'; this.style.color='white'" onmouseout="this.style.background='none'; this.style.color='var(--text-light)'">
+            <i class="fas fa-moon"></i> Koyu Tema
+        </button>
+        <a href="/"><i class="fas fa-external-link-alt"></i> Mağazayı Görüntüle</a>
+        <a href="/admin"><i class="fas fa-sign-out-alt"></i> Çıkış Yap</a>
+    </div>
+</aside>
+<script>
+    function toggleTheme() {
+        const body = document.body;
+        body.classList.toggle('dark-mode');
+        const isDark = body.classList.contains('dark-mode');
+        localStorage.setItem('admin-theme', isDark ? 'dark' : 'light');
+        
+        const btn = document.getElementById('themeToggleBtn');
+        if(isDark) {
+            btn.innerHTML = '<i class="fas fa-sun" style="width:20px; text-align:center;"></i> Açık Tema';
+        } else {
+            btn.innerHTML = '<i class="fas fa-moon" style="width:20px; text-align:center;"></i> Koyu Tema';
+        }
+    }
+    
+    // Yüklenince buton durumunu güncelle
+    document.addEventListener('DOMContentLoaded', () => {
+        if(document.body.classList.contains('dark-mode')) {
+            document.getElementById('themeToggleBtn').innerHTML = '<i class="fas fa-sun" style="width:20px; text-align:center;"></i> Açık Tema';
+        }
+        document.getElementById('themeToggleBtn').querySelector('i').style.width = '20px';
+        document.getElementById('themeToggleBtn').querySelector('i').style.textAlign = 'center';
+    });
+</script>

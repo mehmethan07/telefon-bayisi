@@ -1,0 +1,15 @@
+.error-page {
+    padding: 100px 20px;
+    text-align: center;
+}
+
+.error-title {
+    font-size: 3rem;
+    color: var(--primary-accent);
+}
+
+.error-message {
+    font-size: 1.2rem;
+    margin: 20px 0;
+    color: var(--text-gray);
+}

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | <%= firma_adi %> Yönetim</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <%- include('partials/sidebar', { activePage: 'dashboard' }) %>
+
+        <div class="admin-main">
+            <%- include('partials/topbar', { pageTitle: 'Dashboard', pageIcon: 'fas fa-chart-pie' }) %>
+
+            <!-- Stok Uyarıları (Low Stock Alerts) -->
+            <% if (typeof stokUyarilari !== 'undefined' && stokUyarilari.length > 0) { %>
+            <div id="alerts" style="background:#fef2f2; border:1px solid #fca5a5; border-radius:12px; padding:15px 20px; margin-bottom:25px; display:flex; align-items:center; justify-content:space-between;">
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size:24px; color:#ef4444;"></i>
+                    <div>
+                        <h4 style="color:#b91c1c; margin:0 0 5px 0;">Kritik Stok Uyarısı</h4>
+                        <p style="margin:0; font-size:14px; color:#991b1b;"><%= stokUyarilari.length %> ürünün stoğu kritik seviyede ("Azalıyor" veya "Tükendi"). Lütfen ürün yönetiminden stokları güncelleyin.</p>
+                    </div>
+                </div>
+                <a href="/admin/urunler" class="btn" style="background:white; color:#ef4444; border:1px solid #fca5a5; font-weight:600; padding:8px 15px; text-decoration:none; border-radius:6px;">İncele</a>
+            </div>
+            <% } %>
+
+            <!-- #6 Quick Actions -->
+            <div class="quick-actions">
+                <a href="/admin/urunler" class="quick-action-btn" onclick="setTimeout(()=>document.querySelector&&openModal&&openModal('addModal'),500)"><i class="fas fa-plus"></i> Yeni Ürün Ekle</a>
+                <a href="/admin/aksesuarlar" class="quick-action-btn"><i class="fas fa-plus"></i> Yeni Aksesuar</a>
+                <a href="/admin/mesajlar" class="quick-action-btn"><i class="fas fa-envelope"></i> Mesajları Gör</a>
+                <a href="/admin/siparisler" class="quick-action-btn"><i class="fas fa-shopping-bag"></i> Siparişleri Gör</a>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon revenue"><i class="fas fa-wallet"></i></div>
+                    <div class="stat-info">
+                        <h3>Aylık Ciro</h3>
+                        <p><%= stats.aylik_kazanc %> TL</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon pending"><i class="fas fa-clock"></i></div>
+                    <div class="stat-info">
+                        <h3>Bekleyen Sipariş</h3>
+                        <p><%= stats.bekleyen_siparis %></p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon products"><i class="fas fa-mobile-screen"></i></div>
+                    <div class="stat-info">
+                        <h3>Aktif Ürün</h3>
+                        <p><%= stats.urun_sayisi %></p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon accessories"><i class="fas fa-headphones"></i></div>
+                    <div class="stat-info">
+                        <h3>Aktif Aksesuar</h3>
+                        <p><%= stats.aksesuar_sayisi %></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-sections">
+                <!-- Sol Taraf: Grafik + Son Siparişler -->
+                <div style="display:flex; flex-direction:column; gap:25px; flex:2;">
+                    
+                    <!-- Chart.js Entegrasyonu -->
+                    <div class="list-section" style="padding:25px;">
+                        <h2 style="font-size:18px; margin-bottom:20px; color:var(--text-main);"><i class="fas fa-chart-line" style="color:var(--text-light); margin-right:8px;"></i> Son 6 Aylık Ciro İstatistiği</h2>
+                        <div style="position:relative; height:300px; width:100%;">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="list-section">
+                        <div class="list-header">
+                            <h2><i class="fas fa-shopping-bag" style="color:var(--text-light); margin-right:8px;"></i> Son Ayırtmalar</h2>
+                            <a href="/admin/siparisler">Tümünü Gör →</a>
+                        </div>
+                        <% if (sonSiparisler.length === 0) { %>
+                            <div class="empty-state" style="padding:30px 0;">
+                                <i class="fas fa-box-open"></i>
+                                <p>Henüz sipariş yok.</p>
+                            </div>
+                        <% } else { %>
+                            <% sonSiparisler.forEach(siparis => { %>
+                                <div class="list-item">
+                                    <div class="item-icon"><i class="fas fa-user-circle"></i></div>
+                                    <div class="item-content">
+                                        <div class="item-title">
+                                            <%= siparis.customer_name %>
+                                            <span class="badge-status <%= siparis.status === 'Beklemede' ? 'badge-pending' : 'badge-approved' %>"><%= siparis.status %></span>
+                                        </div>
+                                        <div class="item-desc"><%= siparis.items.length %> Ürün • <%= siparis.total_price %> TL</div>
+                                    </div>
+                                </div>
+                            <% }) %>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Sağ Taraf: Top Brands + Mesajlar -->
+                <div style="display:flex; flex-direction:column; gap:25px; flex:1;">
+                    
+                    <div class="list-section" style="padding:25px;">
+                        <h2 style="font-size:18px; margin-bottom:20px; color:var(--text-main);"><i class="fas fa-trophy" style="color:#eab308; margin-right:8px;"></i> En Çok Satanlar</h2>
+                        <div style="display:flex; flex-direction:column; gap:15px;">
+                            <% topBrands.forEach((b, i) => { %>
+                                <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:var(--bg-main); border-radius:8px; border:1px solid var(--border-color);">
+                                    <div style="display:flex; align-items:center; gap:10px;">
+                                        <div style="width:24px; height:24px; border-radius:50%; background:<%= i===0 ? '#fef08a' : (i===1 ? '#e2e8f0' : '#ffedd5') %>; color:<%= i===0 ? '#eab308' : (i===1 ? '#64748b' : '#f97316') %>; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;"><%= i+1 %></div>
+                                        <span style="font-weight:600; color:var(--text-main);"><%= b.brand %></span>
+                                    </div>
+                                    <span style="font-size:14px; color:var(--text-gray); font-weight:600;"><%= b.sales %> Satış</span>
+                                </div>
+                            <% }) %>
+                        </div>
+                    </div>
+
+                    <div class="list-section">
+                        <div class="list-header">
+                            <h2><i class="fas fa-envelope" style="color:var(--text-light); margin-right:8px;"></i> Son Mesajlar</h2>
+                            <a href="/admin/mesajlar">Tümünü Gör →</a>
+                        </div>
+                        <% if (sonMesajlar.length === 0) { %>
+                            <div class="empty-state" style="padding:30px 0;">
+                                <i class="fas fa-inbox"></i>
+                                <p>Henüz mesaj yok.</p>
+                            </div>
+                        <% } else { %>
+                            <% sonMesajlar.forEach(msg => { %>
+                                <div class="list-item">
+                                    <div class="item-icon"><i class="fas fa-comment-dots"></i></div>
+                                    <div class="item-content">
+                                        <div class="item-title">
+                                            <%= msg.name %>
+                                            <span style="font-size:12px; color:var(--text-light); font-weight:400;"><%= msg.date.split(' ')[0] %></span>
+                                        </div>
+                                        <div class="item-desc" title="<%= msg.message %>">
+                                            <strong><%= msg.subject %>:</strong> <%= msg.message %>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% }) %>
+                        <% } %>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    
+    <!-- Chart.js Kütüphanesi -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            const dataLabels = <% if(typeof chartLabels !== 'undefined') { %><%- chartLabels %><% } else { %>[]<% } %>;
+            const dataPoints = <% if(typeof chartData !== 'undefined') { %><%- chartData %><% } else { %>[]<% } %>;
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: dataLabels,
+                    datasets: [{
+                        label: 'Aylık Satış (TL)',
+                        data: dataPoints,
+                        backgroundColor: 'rgba(14, 165, 233, 0.8)',
+                        borderRadius: 6,
+                        hoverBackgroundColor: 'rgba(2, 132, 199, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

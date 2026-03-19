@@ -1,0 +1,110 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/ayirt.css">
+
+<section class="page-hero">
+    <span class="section-subtitle">MAĞAZADAN AL / AYIRT</span>
+    <h1 class="section-title">Siparişi Tamamla</h1>
+    <p class="section-desc">Sepetinizdeki ürünleri sizin adınıza mağazamızda ayıralım.</p>
+</section>
+
+<section class="reserve-section">
+    <div class="reserve-wrapper">
+
+        <% if (typeof success !== 'undefined' && success) { %>
+            <div class="reserve-success">
+                <i class="fas fa-check-circle"></i>
+                <h3>Talebiniz Alındı</h3>
+                <p>Ürünleriniz sizin adınıza mağazamızda ayrılmıştır. <br>Lütfen en kısa sürede mağazamızı ziyaret ediniz.</p>
+                <a href="/" class="btn-primary">Anasayfaya Dön</a>
+                <a href="/iletisim" class="btn-primary" style="background:transparent; border:1px solid #16a34a; color:#16a34a; margin-left:10px;">İletişim Bilgilerimiz</a>
+            </div>
+        <% } else { %>
+            <% if (typeof error !== 'undefined' && error) { %>
+                <div style="background:#fee2e2; color:#b91c1c; padding:15px; border-radius:8px; margin-bottom:20px;">
+                    <i class="fas fa-exclamation-circle"></i> <%= error %>
+                </div>
+            <% } %>
+            <div class="reserve-card">
+                <div class="reserve-item-info" style="align-items: flex-start; text-align: left;">
+                    <h3 style="margin-bottom: 20px; font-size:1.2rem; color:var(--text-main); width: 100%; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">Sipariş Özeti</h3>
+                    
+                    <div style="width: 100%; display: flex; flex-direction: column; gap: 15px; margin-bottom: 30px;">
+                        <% if (typeof sepet !== 'undefined' && sepet.length > 0) { %>
+                            <% sepet.forEach(s => { %>
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    <div style="width: 50px; height: 50px; background: var(--bg-main); border-radius: 8px; display:flex; align-items:center; justify-content:center;">
+                                        <% if (s.item.image_url) { %>
+                                            <img src="<%= s.item.image_url %>" style="max-width:80%; max-height:80%; object-fit:contain;">
+                                        <% } else { %>
+                                            <i class="<%= s.item.icon || 'fas fa-box' %>" style="color:var(--primary-accent)"></i>
+                                        <% } %>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <div style="font-size: 14px; font-weight: 600; color: var(--text-main);"><%= s.item.name %></div>
+                                        <div style="font-size: 12px; color: var(--text-gray);"><%= s.miktar %> Adet</div>
+                                    </div>
+                                    <div style="font-size: 14px; font-weight: 700; color: var(--primary-accent);"><%= s.item.price %> TL</div>
+                                </div>
+                            <% }) %>
+                        <% } %>
+                    </div>
+
+                    <div style="width: 100%; border-top: 1px solid var(--border-color); padding-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: 600; color: var(--text-gray);">Toplam Tutar:</span>
+                        <span style="font-size: 1.5rem; font-weight: 800; color: var(--text-main);"><%= typeof toplam !== 'undefined' ? toplam : '0' %> TL</span>
+                    </div>
+                </div>
+
+                <div class="reserve-form-container">
+                    <h2>Müşteri Bilgileri</h2>
+                    <p>Lütfen siparişinizi mağazadan teslim alırken doğrulama yapabilmemiz için bilgilerinizi girin.</p>
+
+                    <form action="/siparis/tamamla" method="POST">
+                        <div class="form-field">
+                            <label>Ad Soyad <span>*</span></label>
+                            <input type="text" name="customer_name" class="form-input" placeholder="Adınız Soyadınız" required>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Telefon <span>*</span></label>
+                                <input type="tel" name="phone" class="form-input" placeholder="05xxxxxxxxx" pattern="[0-9]{10,11}" title="Lütfen 10 veya 11 haneli telefon numaranızı girin" required>
+                            </div>
+                            <div class="form-field">
+                                <label>E-posta</label>
+                                <input type="email" name="email" class="form-input" placeholder="ornek@mail.com">
+                            </div>
+                        </div>
+
+                        <div class="form-field" style="margin-top: 25px;">
+                            <label>Mağazada Ödeme Tercihi <span>*</span></label>
+                            <div class="radio-group" style="margin-top: 10px;">
+                                <label class="radio-option">
+                                    <input type="radio" name="payment_method" value="Nakit" required>
+                                    <div class="radio-label">
+                                        <i class="fas fa-money-bill-wave"></i>
+                                        Nakit
+                                    </div>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="payment_method" value="Kredi Kartı">
+                                    <div class="radio-label">
+                                        <i class="fas fa-credit-card"></i>
+                                        Kredi Kartı
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-primary form-submit" style="margin-top: 30px;">
+                            Siparişi Tamamla (Ayırt)
+                        </button>
+                    </form>
+                </div>
+            </div>
+        <% } %>
+
+    </div>
+</section>
+
+<%- include('partials/footer') %>

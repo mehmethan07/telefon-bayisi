@@ -5,9 +5,9 @@
         <div class="hero-badge">
             <i class="fas fa-shield-check"></i> %100 Orijinal & Garantili Ürünler
         </div>
-        
+
         <h1 class="hero-title">İhtiyacın Olan <br><span class="highlight-text">Her Şey Burada.</span></h1>
-        
+
         <p class="hero-desc">En yeni akıllı cihazlar, şeffaf fiyatlı profesyonel teknik servis ve binlerce orijinal aksesuar. Teknolojiyi sizin için güvenilir ve ulaşılabilir kılıyoruz.</p>
 
         <div class="hero-btns">
@@ -17,20 +17,20 @@
 
     <div class="hero-image-wrapper">
         <div class="float-card float-1">
-            <i class="fas fa-box-open" style="color: #3b82f6;"></i> Kapalı Kutu
+            <i class="fas fa-box-open"></i> Kapalı Kutu
         </div>
         <div class="float-card float-2">
-            <i class="fas fa-microchip" style="color: #3b82f6;"></i> Orijinal Yedek Parça
+            <i class="fas fa-microchip"></i> Orijinal Yedek Parça
         </div>
-        
+
         <div class="floating-wrapper">
-            <img src="/images/telefon.webp" 
-                 alt="Premium Akıllı Telefon Modeli" 
-                 class="main-device" 
-                 data-tilt 
-                 data-tilt-max="5" 
-                 data-tilt-speed="1000" 
-                 data-tilt-perspective="1000" 
+            <img src="/images/telefon.webp"
+                 alt="Akıllı Telefon"
+                 class="main-device"
+                 data-tilt
+                 data-tilt-max="5"
+                 data-tilt-speed="1000"
+                 data-tilt-perspective="1000"
                  data-tilt-scale="1.01"
                  data-tilt-glare="true"
                  data-tilt-max-glare="0.15">
@@ -38,21 +38,126 @@
     </div>
 </section>
 
-<section class="logos">
-    <p class="logos-title">SATIŞ VE SERVİS AĞIMIZ</p>
-    <div class="logos-container">
-        <div class="logo-item"><i class="fab fa-apple"></i> Apple</div>
-        <div class="logo-item"><i class="fab fa-samsung"></i> Samsung</div>
-        <div class="logo-item"><i class="fas fa-mobile-button"></i> Xiaomi</div>
-        <div class="logo-item"><i class="fas fa-mobile-screen"></i> Huawei</div>
+<!-- Swiper CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+<style>
+.product-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: 0.3s;
+    display: flex;
+    flex-direction: column;
+}
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.06);
+}
+</style>
+
+<section class="trust-badges" style="background:#fff; padding:40px 5%; border-bottom:1px solid var(--border-color);">
+    <div style="max-width:1200px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:30px; text-align:center;">
+        <div style="padding:20px; border-radius:12px; transition:0.3s; cursor:default;" onmouseover="this.style.background='var(--bg-main)'; this.style.transform='translateY(-3px)'" onmouseout="this.style.background='transparent'; this.style.transform='translateY(0)'">
+            <i class="fas fa-truck-fast" style="font-size:36px; color:var(--primary-accent); margin-bottom:15px; display:inline-block;"></i>
+            <h4 style="font-size:16px; margin-bottom:8px;">Hızlı Teslimat</h4>
+            <p style="font-size:14px; color:var(--text-gray);">16:00'a kadar siparişler aynı gün kargo</p>
+        </div>
+        <div style="padding:20px; border-radius:12px; transition:0.3s; cursor:default;" onmouseover="this.style.background='var(--bg-main)'; this.style.transform='translateY(-3px)'" onmouseout="this.style.background='transparent'; this.style.transform='translateY(0)'">
+            <i class="fas fa-shield-halved" style="font-size:36px; color:var(--primary-accent); margin-bottom:15px; display:inline-block;"></i>
+            <h4 style="font-size:16px; margin-bottom:8px;">Güvenli Alışveriş</h4>
+            <p style="font-size:14px; color:var(--text-gray);">256-bit SSL korumalı ödeme altyapısı</p>
+        </div>
+        <div style="padding:20px; border-radius:12px; transition:0.3s; cursor:default;" onmouseover="this.style.background='var(--bg-main)'; this.style.transform='translateY(-3px)'" onmouseout="this.style.background='transparent'; this.style.transform='translateY(0)'">
+            <i class="fas fa-certificate" style="font-size:36px; color:var(--primary-accent); margin-bottom:15px; display:inline-block;"></i>
+            <h4 style="font-size:16px; margin-bottom:8px;">Orijinal Ürün</h4>
+            <p style="font-size:14px; color:var(--text-gray);">Kapalı kutu distribütör garantili</p>
+        </div>
     </div>
 </section>
+
+<section style="padding: 60px 5%; max-width: 1200px; margin: 0 auto; overflow:visible;">
+    <div class="section-header" style="margin-bottom: 40px; text-align:left; display:flex; justify-content:space-between; align-items:flex-end;">
+        <div>
+            <span class="section-subtitle">VİTRİN</span>
+            <h2 class="section-title" style="margin-bottom:0;">Öne Çıkan Cihazlar</h2>
+        </div>
+        <div class="swiper-nav-btns" style="display:flex; gap:10px;">
+            <div class="swiper-button-prev-custom" style="width:40px; height:40px; border-radius:50%; background:white; display:flex; align-items:center; justify-content:center; cursor:pointer; border:1px solid var(--border-color); color:var(--text-main); transition:0.3s;"><i class="fas fa-chevron-left"></i></div>
+            <div class="swiper-button-next-custom" style="width:40px; height:40px; border-radius:50%; background:white; display:flex; align-items:center; justify-content:center; cursor:pointer; border:1px solid var(--border-color); color:var(--text-main); transition:0.3s;"><i class="fas fa-chevron-right"></i></div>
+        </div>
+    </div>
+
+    <!-- Swiper -->
+    <div class="swiper featuredSwiper" style="padding-bottom:20px;">
+        <div class="swiper-wrapper">
+            <% featuredProducts.forEach(p => { %>
+                <div class="swiper-slide product-card" style="border:1px solid var(--border-color);">
+                    <div class="product-image-box" style="padding:30px; display:flex; justify-content:center; align-items:center; background:#fff;">
+                        <img src="<%= p.image_url %>" alt="<%= p.name %>" style="max-height:180px; object-fit:contain; transition:0.4s;">
+                    </div>
+                    <div style="padding:20px; border-top:1px solid var(--border-color); background:#fff; flex-grow:1; display:flex; flex-direction:column;">
+                        <span style="font-size:12px; color:var(--text-gray); font-weight:700; display:block; margin-bottom:5px; text-transform:uppercase; letter-spacing:1px;"><%= p.brand %></span>
+                        <h3 style="font-family:'Inter',sans-serif; font-size:16px; margin-bottom:10px; color:var(--text-main); font-weight:600;"><%= p.name %></h3>
+                        <p style="font-size:20px; font-weight:700; color:var(--primary-accent); margin-bottom:20px; font-family:'Space Grotesk',sans-serif;"><%= p.price %> TL</p>
+                        <a href="/urunler/<%= p.id %>" class="btn-primary" style="margin-top:auto; justify-content:center; padding:12px; font-size:14px; width:100%;">Detayları İncele</a>
+                    </div>
+                </div>
+            <% }) %>
+            <% featuredProducts.map(p => { %> 
+                <!-- Mocking more slides to make the carousel scrollable since we only have 3 products -->
+                <div class="swiper-slide product-card" style="border:1px solid var(--border-color);">
+                    <div class="product-image-box" style="padding:30px; display:flex; justify-content:center; align-items:center; background:#fff;">
+                        <img src="<%= p.image_url %>" alt="<%= p.name %>" style="max-height:180px; object-fit:contain; transition:0.4s;">
+                    </div>
+                    <div style="padding:20px; border-top:1px solid var(--border-color); background:#fff; flex-grow:1; display:flex; flex-direction:column;">
+                        <span style="font-size:12px; color:var(--text-gray); font-weight:700; display:block; margin-bottom:5px; text-transform:uppercase; letter-spacing:1px;"><%= p.brand %></span>
+                        <h3 style="font-family:'Inter',sans-serif; font-size:16px; margin-bottom:10px; color:var(--text-main); font-weight:600;"><%= p.name %></h3>
+                        <p style="font-size:20px; font-weight:700; color:var(--primary-accent); margin-bottom:20px; font-family:'Space Grotesk',sans-serif;"><%= p.price %> TL</p>
+                        <a href="/urunler/<%= p.id %>" class="btn-primary" style="margin-top:auto; justify-content:center; padding:12px; font-size:14px; width:100%;">Detayları İncele</a>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+    </div>
+</section>
+
+<!-- Swiper JS -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const swiper = new Swiper(".featuredSwiper", {
+            slidesPerView: 1,
+            spaceBetween: 20,
+            loop: true,
+            navigation: {
+                nextEl: '.swiper-button-next-custom',
+                prevEl: '.swiper-button-prev-custom',
+            },
+            breakpoints: {
+                640: { slidesPerView: 2 },
+                900: { slidesPerView: 3 },
+                1200: { slidesPerView: 4 }
+            }
+        });
+        
+        document.querySelectorAll('.swiper-nav-btns div').forEach(btn => {
+            btn.addEventListener('mouseenter', () => { btn.style.background = 'var(--primary-accent)'; btn.style.color = 'white'; btn.style.borderColor = 'var(--primary-accent)'; });
+            btn.addEventListener('mouseleave', () => { btn.style.background = 'white'; btn.style.color = 'var(--text-main)'; btn.style.borderColor = 'var(--border-color)'; });
+        });
+
+        // Hover effect for image scale
+        document.querySelectorAll('.product-card').forEach(card => {
+            card.addEventListener('mouseenter', () => { card.querySelector('img').style.transform = 'scale(1.08)'; });
+            card.addEventListener('mouseleave', () => { card.querySelector('img').style.transform = 'scale(1)'; });
+        });
+    });
+</script>
 
 <section class="services" id="services">
     <div class="section-header">
         <span class="section-subtitle">HİZMETLERİMİZ</span>
         <h2 class="section-title">Neler Yapıyoruz?</h2>
-        <p style="color: var(--text-gray);">Cihaz alımından teknik servise kadar tüm ihtiyaçlarınız tek noktada.</p>
+        <p class="section-desc">Cihaz alımından teknik servise kadar tüm ihtiyaçlarınız tek noktada.</p>
     </div>
 
     <div class="services-grid">
@@ -67,7 +172,7 @@
             <div class="icon-box"><i class="fas fa-screwdriver-wrench"></i></div>
             <h3 class="service-title">Teknik Servis</h3>
             <p class="service-desc">Ekran değişimi, batarya yenileme ve mikro-lehimleme işlemleri profesyonel ekipmanlarla hızla yapılır.</p>
-            <a href="/servis" class="service-link">Servis Kaydı Oluştur <i class="fas fa-arrow-right"></i></a>
+            <a href="/servis/kayit" class="service-link">Servis Kaydı Oluştur <i class="fas fa-arrow-right"></i></a>
         </div>
 
         <div class="service-card">
@@ -83,16 +188,16 @@
     <div class="workflow-header">
         <span class="section-subtitle">MAĞAZA STANDARTLARIMIZ</span>
         <h2 class="section-title">İşlem Süreçlerimiz</h2>
-        <p style="color: var(--text-gray); max-width: 600px; margin: 15px auto 0;">İster yeni bir cihaz alın, ister onarım yaptırın; her adımda şeffaf ve güvenilir bir deneyim sunuyoruz.</p>
+        <p class="section-desc">İster yeni bir cihaz alın, ister onarım yaptırın; her adımda şeffaf ve güvenilir bir deneyim sunuyoruz.</p>
     </div>
 
     <div class="workflow-grid">
-        
+
         <div class="workflow-column">
             <h3 class="workflow-col-title">
                 <i class="fas fa-shopping-bag"></i> Cihaz Alım Süreci
             </h3>
-            
+
             <div class="step-card">
                 <div class="step-badge">01</div>
                 <div class="step-content">
@@ -122,7 +227,7 @@
             <h3 class="workflow-col-title">
                 <i class="fas fa-wrench"></i> Teknik Servis Süreci
             </h3>
-            
+
             <div class="step-card">
                 <div class="step-badge">01</div>
                 <div class="step-content">
@@ -155,7 +260,7 @@
         <span class="section-subtitle">MERAK EDİLENLER</span>
         <h2 class="section-title">Sıkça Sorulan Sorular</h2>
     </div>
-    
+
     <div class="faq-container">
         <details class="faq-item">
             <summary class="faq-question">Satın aldığım cihazlar garantili mi?</summary>
@@ -177,7 +282,7 @@
                 Elbette. Eski cihazınızı mağazamıza getirdiğinizde uzman teknisyenlerimiz tarafından kozmetik ve donanımsal bir teste tabi tutulur. Belirlenen takas bedeli, yeni alacağınız cihazın fiyatından peşin olarak düşülerek işlem sağlanır.
             </div>
         </details>
-        
+
         <details class="faq-item">
             <summary class="faq-question">Ödeme yöntemleriniz nelerdir? Kredi kartına taksit yapıyor musunuz?</summary>
             <div class="faq-answer">

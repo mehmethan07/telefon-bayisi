@@ -4,23 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= firma_adi %></title>
-    
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    
-    <link rel="stylesheet" href="/css/style.css">
+
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/hero.css">
+    <link rel="stylesheet" href="/css/sections.css">
+    <link rel="stylesheet" href="/css/products.css">
+    <link rel="stylesheet" href="/css/servis.css">
+    <link rel="stylesheet" href="/css/error.css">
+    <link rel="stylesheet" href="/css/hakkimizda.css">
+    <link rel="stylesheet" href="/css/aksesuarlar.css">
+    <link rel="stylesheet" href="/css/detay.css">
+    <link rel="stylesheet" href="/css/servis-kayit.css">
+    <link rel="stylesheet" href="/css/iletisim.css">
+    <link rel="stylesheet" href="/css/footer.css">
 </head>
 <body>
 
     <header class="main-header">
         <a href="/" class="logo">BAYİM</a>
+        <button class="menu-toggle" onclick="document.querySelector('.main-nav').classList.toggle('open')">
+            <i class="fas fa-bars"></i>
+        </button>
         <nav class="main-nav">
-            <a href="/">Anasayfa</a>
-            <a href="/urunler">Cihazlar</a>
-            <a href="/aksesuarlar">Aksesuarlar</a>
-            <a href="/hakkimizda">Hakkımızda</a>
+            <a href="/" class="<%= currentPath === '/' ? 'active' : '' %>">Anasayfa</a>
+            <a href="/urunler" class="<%= currentPath.startsWith('/urunler') ? 'active' : '' %>">Cihazlar</a>
+            <a href="/aksesuarlar" class="<%= currentPath.startsWith('/aksesuarlar') ? 'active' : '' %>">Aksesuarlar</a>
+            <a href="/servis" class="<%= currentPath.startsWith('/servis') ? 'active' : '' %>">Servis</a>
+            <a href="/hakkimizda" class="<%= currentPath === '/hakkimizda' ? 'active' : '' %>">Hakkımızda</a>
+            <a href="/iletisim" class="nav-contact-btn <%= currentPath === '/iletisim' ? 'active' : '' %>">İletişim</a>
         </nav>
-        <a href="/iletisim" class="header-btn">İletişim</a>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <a href="/sepet" class="cart-btn" style="position: relative; display: flex; align-items: center; justify-content: center; width: 45px; height: 45px; border-radius: 50%; background: var(--bg-main); color: var(--text-main); border: 1px solid var(--border-color); text-decoration: none; transition: 0.3s; font-size: 1.1rem;">
+                <i class="fas fa-shopping-cart"></i>
+                <% if (sepet_sayisi > 0) { %>
+                    <span style="position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; width: 22px; height: 22px; font-size: 11px; font-weight: 700; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white;"><%= sepet_sayisi %></span>
+                <% } %>
+            </a>
+            <a href="/iletisim" class="header-btn">İletişim</a>
+        </div>
     </header>
 
     <main class="container">

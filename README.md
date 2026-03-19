@@ -4,43 +4,47 @@ Bu proje, bir telefon bayisinin hem ürün satışlarını (telefon, aksesuar) h
 
 ## 🚀 Özellikler
 
-- **Modern & Responsive Tasarım:** Tüm cihazlarda (mobil, tablet, desktop) kusursuz görünüm.
-- **Dinamik İçerik:** EJS şablon motoru ile yönetilebilir sayfalar.
-- **Teknik Servis Modülü:** Arıza tespiti ve onarım süreçleri için bilgilendirme alanları.
-- **Admin Paneli:** (Geliştirme aşamasında) Ürün ve servis yönetimi.
+* **Modern & Responsive Tasarım:** Tüm cihazlarda (mobil, tablet, desktop) uyumlu görünüm.
+* **Dinamik Sayfalar:** EJS şablon motoru ile yönetilebilir yapı.
+* **Ürün & Aksesuar Kataloğu:** Listeleme, detay görüntüleme ve filtreleme akışları.
+* **Sepet & Ayırtma Modülü:** Sepete ekleme, adet artırma/azaltma, mağazadan ayırtma.
+* **Teknik Servis Modülü:** Servis bilgilendirme ve servis kayıt formu.
+* **Admin Paneli:** Dashboard, ürün yönetimi, aksesuar yönetimi, sipariş ve mesaj ekranları.
+* **Hata Yönetimi:** 404 ve bilgilendirme sayfaları.
 
 ## 🛠️ Teknolojiler
 
-- **Backend:** Node.js, Express.js
-- **Frontend:** EJS, Vanilla CSS
-- **Veritabanı:** PostgreSQL (Entegrasyon aşamasında)
-- **İkonlar:** FontAwesome 6
+* **Backend:** Node.js, Express.js
+* **Frontend:** EJS, Vanilla CSS
+* **Veritabanı:** PostgreSQL (Entegrasyon aşamasında)
+* **İkonlar:** FontAwesome 6
 
 ## 📦 Kurulum
 
-1. Depoyu klonlayın:
-   ```bash
-   git clone https://github.com/kullaniciadi/telefon-bayisi.git
-   ```
-2. Proje dizinine gidin:
-   ```bash
-   cd telefon-bayisi
-   ```
-3. Bağımlılıkları yükleyin:
-   ```bash
-   npm install
-   ```
-4. Uygulamayı başlatın:
-   ```bash
-   npm start
-   ```
+1. Depoyu klonlayın:  
+git clone https://github.com/mehmethan07/telefon-bayisi.git
+
+2. Proje dizinine gidin:  
+cd telefon-bayisi
+
+3. Bağımlılıkları yükleyin:  
+npm install
+
+4. Uygulamayı başlatın:  
+npm start
 
 Uygulama varsayılan olarak `http://localhost:8080` adresinde çalışacaktır.
 
+## 📌 Notlar
+
+* Bu sürümde bazı veriler geçici (in-memory) yapıdadır.
+* PostgreSQL entegrasyonu bir sonraki aşamada aktif hale getirilecektir.
+* UI/CSS yapısı sayfa bazlı dosyalara ayrılarak düzenlenmiştir.
+
 ## 👥 Geliştiriciler
 
-Bu proje iki kişilik bir ekip tarafından ortaklaşa geliştirilmektedir. Her iki geliştirici de projenin mimarisi ve geliştirme süreçlerinde aktif rol oynamaktadır.
+Bu proje ekip çalışmasıyla geliştirilmektedir.
 
 ## 📝 Lisans
 
-Bu proje [ISC](LICENSE) lisansı altındadır.
+Bu proje ISC lisansı altındadır.

@@ -1,0 +1,341 @@
+/* Markalar */
+.logos {
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 40px 0;
+    text-align: center;
+    background: var(--card-bg);
+}
+
+.logos-title {
+    color: var(--text-gray);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-bottom: 30px;
+}
+
+.logos-container {
+    display: flex;
+    justify-content: center;
+    gap: 70px;
+    flex-wrap: wrap;
+}
+
+.logo-item {
+    color: var(--text-gray);
+    font-size: 1.4rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: color 0.3s;
+}
+
+.logo-item:hover {
+    color: var(--text-main);
+}
+
+/* Hizmetler */
+.services {
+    padding: 100px 5%;
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.service-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    padding: 40px 30px;
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+}
+
+.service-card:hover {
+    border-color: var(--primary-accent);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+}
+
+.icon-box {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-bottom: 25px;
+    background: rgba(14, 165, 233, 0.1);
+    border: 1px solid rgba(14, 165, 233, 0.2);
+    color: var(--primary-accent);
+}
+
+.service-title {
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+    color: var(--text-main);
+}
+
+.service-desc {
+    color: var(--text-gray);
+    line-height: 1.6;
+    margin-bottom: 25px;
+    font-size: 15px;
+}
+
+.service-link {
+    color: var(--text-main);
+    font-weight: 700;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.3s;
+}
+
+.service-link:hover {
+    color: var(--primary-accent);
+    gap: 12px;
+}
+
+/* Süreçler */
+.workflow-section {
+    padding: 100px 5% 120px;
+    background: var(--bg-main);
+}
+
+.workflow-header {
+    text-align: center;
+    margin-bottom: 70px;
+}
+
+.workflow-header .section-desc {
+    max-width: 600px;
+    margin: 15px auto 0;
+}
+
+.workflow-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.workflow-column {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+    position: relative;
+    overflow: hidden;
+}
+
+.workflow-column::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: linear-gradient(90deg, var(--primary-accent), #38bdf8);
+}
+
+.workflow-col-title {
+    font-size: 1.6rem;
+    color: var(--text-main);
+    margin-bottom: 35px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.workflow-col-title i {
+    background: rgba(14, 165, 233, 0.1);
+    color: var(--primary-accent);
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 1.2rem;
+}
+
+.step-card {
+    display: flex;
+    gap: 20px;
+    padding: 25px;
+    margin-bottom: 20px;
+    border-radius: 16px;
+    background: var(--bg-main);
+    border: 1px solid rgba(0, 0, 0, 0.03);
+    transition: all 0.3s ease;
+}
+
+.step-card:hover {
+    background: var(--card-bg);
+    border-color: var(--primary-accent);
+    transform: translateX(10px);
+    box-shadow: 0 10px 20px rgba(14, 165, 233, 0.08);
+}
+
+.step-card:last-child {
+    margin-bottom: 0;
+}
+
+.step-badge {
+    background: var(--primary-accent);
+    color: white;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    height: 38px;
+    min-width: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
+}
+
+.step-content h4 {
+    font-size: 1.15rem;
+    color: var(--text-main);
+    margin-bottom: 8px;
+}
+
+.step-content p {
+    color: var(--text-gray);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+/* SSS */
+.faq-section {
+    padding: 80px 5% 120px;
+    background: var(--bg-main);
+}
+
+.faq-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.faq-container {
+    max-width: 850px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+details.faq-item {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+details.faq-item[open] {
+    border-color: var(--primary-accent);
+    box-shadow: 0 4px 20px rgba(14, 165, 233, 0.08);
+}
+
+summary.faq-question {
+    padding: 22px 25px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-main);
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: color 0.3s;
+}
+
+summary.faq-question::-webkit-details-marker {
+    display: none;
+}
+
+summary.faq-question::after {
+    content: '\f078';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    color: var(--text-gray);
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+summary.faq-question:hover {
+    color: var(--primary-accent);
+}
+
+details.faq-item[open] summary.faq-question::after {
+    transform: rotate(180deg);
+    color: var(--primary-accent);
+}
+
+.faq-answer {
+    padding: 0 25px 25px;
+    color: var(--text-gray);
+    line-height: 1.7;
+    font-size: 0.95rem;
+    border-top: 1px solid transparent;
+}
+
+details.faq-item[open] .faq-answer {
+    border-top-color: rgba(0, 0, 0, 0.04);
+    padding-top: 20px;
+}
+
+@media (max-width: 768px) {
+    .logos-container {
+        gap: 30px;
+    }
+
+    .logo-item {
+        font-size: 1.1rem;
+    }
+
+    .services {
+        padding: 60px 5%;
+    }
+
+    .section-title {
+        font-size: 2rem;
+    }
+
+    .services-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .workflow-section {
+        padding: 60px 5% 80px;
+    }
+
+    .workflow-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .workflow-column {
+        padding: 25px;
+    }
+
+    .step-card {
+        padding: 18px;
+    }
+
+    .faq-section {
+        padding: 60px 5% 80px;
+    }
+
+    summary.faq-question {
+        font-size: 0.95rem;
+        padding: 18px 20px;
+    }
+}

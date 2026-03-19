@@ -1,0 +1,122 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/ayirt.css">
+
+<style>
+.cart-section { padding: 60px 5%; max-width: 1000px; margin: 0 auto; min-height: 60vh; }
+.cart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; }
+.cart-list { display: flex; flex-direction: column; gap: 20px; }
+.cart-item { display: flex; align-items: center; background: #fff; border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+.cart-item-img { width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; background: var(--bg-main); border-radius: 12px; margin-right: 20px; }
+.cart-item-img img { max-width: 90%; max-height: 90%; object-fit: contain; }
+.cart-item-img i { font-size: 40px; color: var(--primary-accent); }
+.cart-item-info { flex: 1; }
+.cart-item-title { font-size: 1.1rem; color: var(--text-main); margin-bottom: 5px; }
+.cart-item-meta { font-size: 13px; color: var(--text-gray); }
+.cart-item-price { font-size: 1.3rem; font-weight: 700; color: var(--primary-accent); margin: 0 30px; }
+.cart-item-qty { display: flex; align-items: center; gap: 0; margin-right: 20px; }
+.qty-btn { width: 36px; height: 36px; border: 1.5px solid var(--border-color); background: var(--bg-main); cursor: pointer; font-size: 16px; font-weight: 700; color: var(--text-main); transition: 0.2s; display: flex; align-items: center; justify-content: center; }
+.qty-btn:hover { background: var(--primary-accent); color: white; border-color: var(--primary-accent); }
+.qty-btn:first-child { border-radius: 8px 0 0 8px; }
+.qty-btn:last-child { border-radius: 0 8px 8px 0; }
+.qty-value { min-width: 40px; text-align: center; font-weight: 700; font-size: 14px; border-top: 1.5px solid var(--border-color); border-bottom: 1.5px solid var(--border-color); height: 36px; line-height: 33px; background: white; }
+.btn-remove { background: #fee2e2; color: #ef4444; border: none; width: 40px; height: 40px; border-radius: 10px; cursor: pointer; transition: 0.2s; }
+.btn-remove:hover { background: #ef4444; color: white; }
+.cart-summary { margin-top: 40px; background: #fff; border: 1px solid var(--border-color); border-radius: 16px; padding: 30px; display: flex; justify-content: space-between; align-items: center; }
+.cart-total h3 { font-size: 1.2rem; color: var(--text-gray); margin-bottom: 5px; }
+.cart-total .total-price { font-size: 2rem; font-weight: 800; color: var(--text-main); }
+.empty-cart { text-align: center; padding: 80px 20px; }
+.empty-cart i { font-size: 4rem; color: #cbd5e1; margin-bottom: 20px; }
+.empty-cart h2 { color: var(--text-main); margin-bottom: 15px; }
+.empty-cart p { color: var(--text-gray); margin-bottom: 30px; }
+@media(max-width: 768px) {
+    .cart-item { flex-direction: column; text-align: center; }
+    .cart-item-img { margin: 0 0 15px 0; }
+    .cart-item-price { margin: 15px 0; }
+    .cart-summary { flex-direction: column; text-align: center; gap: 20px; }
+}
+</style>
+
+<section class="page-hero">
+    <span class="section-subtitle">KONTROL ET</span>
+    <h1 class="section-title">Sepetim</h1>
+</section>
+
+<section class="cart-section">
+    <% if (sepet.length === 0) { %>
+        <div class="empty-cart">
+            <i class="fas fa-shopping-basket"></i>
+            <h2>Sepetiniz şu an boş.</h2>
+            <p>Mağazamızdaki en yeni cihazlara ve aksesuarlara göz atabilirsiniz.</p>
+            <a href="/urunler" class="btn-primary" style="display:inline-block;">Alışverişe Başla</a>
+        </div>
+    <% } else { %>
+        <div class="cart-header">
+            <h2>Ürünler (<%= Object.keys(sepet).length %> Çeşit)</h2>
+            <a href="/urunler" style="font-weight:600; color:var(--primary-accent); text-decoration:none;"><i class="fas fa-plus"></i> Ürün Ekle</a>
+        </div>
+        
+        <% 
+           const numericTotal = parseFloat(toplamFiyat.replace(/\./g, '').replace(',', '.'));
+           const kargoLimit = 3000;
+           const kalanKargo = kargoLimit - numericTotal;
+           const progressWidth = numericTotal >= kargoLimit ? 100 : (numericTotal / kargoLimit) * 100;
+        %>
+        <div class="shipping-bar-wrapper" style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:12px; padding:20px; margin-bottom:25px;">
+            <% if (kalanKargo > 0) { %>
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:15px; font-weight:600;">
+                    <span>Ücretsiz Kargo Fırsatı</span>
+                    <span style="color:#ef4444;"><%= kalanKargo.toLocaleString('tr-TR') %> TL Kaldı</span>
+                </div>
+            <% } else { %>
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:15px; font-weight:600; color:#16a34a;">
+                    <span><i class="fas fa-check-circle"></i> Ücretsiz Kargo Seçeneği Aktif!</span>
+                </div>
+            <% } %>
+            <div style="width:100%; height:12px; background:#e2e8f0; border-radius:20px; overflow:hidden;">
+                <div style="height:100%; width:<%= progressWidth %>%; background:<%= kalanKargo > 0 ? 'var(--primary-accent)' : '#16a34a' %>; transition:0.5s;"></div>
+            </div>
+            <% if (kalanKargo > 0) { %>
+                <p style="font-size:13px; color:var(--text-gray); margin-top:8px;">Sepetinize <%= kalanKargo.toLocaleString('tr-TR') %> TL'lik ürün daha ekleyin, kargo bedavaya gelsin!</p>
+            <% } %>
+        </div>
+
+        <div class="cart-list">
+            <% sepet.forEach(s => { %>
+                <div class="cart-item">
+                    <div class="cart-item-img">
+                        <% if (s.item.image_url) { %>
+                            <img src="<%= s.item.image_url %>" alt="<%= s.item.name %>">
+                        <% } else { %>
+                            <i class="<%= s.item.icon || 'fas fa-box' %>"></i>
+                        <% } %>
+                    </div>
+                    <div class="cart-item-info">
+                        <div class="cart-item-title"><%= s.item.name %></div>
+                        <div class="cart-item-meta"><%= s.item.brand || s.item.category %></div>
+                    </div>
+                    <div class="cart-item-price"><%= s.item.price %> TL</div>
+                    <div class="cart-item-qty">
+                        <form action="/sepet/azalt/<%= s.type %>/<%= s.item.id %>" method="POST" style="margin:0;"><button type="submit" class="qty-btn">−</button></form>
+                        <span class="qty-value"><%= s.miktar %></span>
+                        <form action="/sepet/artir/<%= s.type %>/<%= s.item.id %>" method="POST" style="margin:0;"><button type="submit" class="qty-btn">+</button></form>
+                    </div>
+                    <a href="/sepet/sil/<%= s.type %>/<%= s.item.id %>" class="btn-remove" style="display:flex; align-items:center; justify-content:center; text-decoration:none;" title="Kaldır">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                </div>
+            <% }) %>
+        </div>
+
+        <div class="cart-summary">
+            <div class="cart-total">
+                <h3>Genel Toplam (KDV Dahil)</h3>
+                <div class="total-price"><%= toplamFiyat %> TL</div>
+            </div>
+            <a href="/siparis/tamamla" class="btn-primary" style="padding: 18px 40px; font-size: 1.1rem;">
+                Sepeti Onayla / Mağazadan Ayırt <i class="fas fa-arrow-right" style="margin-left:10px;"></i>
+            </a>
+        </div>
+    <% } %>
+</section>
+
+<%- include('partials/footer') %>

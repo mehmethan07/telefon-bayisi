@@ -1,0 +1,16 @@
+<div class="admin-topbar">
+    <div style="display:flex; align-items:center; gap:12px;">
+        <button class="sidebar-toggle" onclick="document.querySelector('.admin-sidebar').classList.toggle('open')"><i class="fas fa-bars"></i></button>
+        <h1><i class="<%= pageIcon %>"></i> <%= pageTitle %> <% if(typeof badgeCount !== 'undefined') { %><span class="badge"><%= badgeCount %></span><% } %></h1>
+    </div>
+    <div class="topbar-actions" style="display:flex; align-items:center; gap:20px;">
+        <!-- Notification Bell -->
+        <div style="position:relative; cursor:pointer;" onclick="window.location.href='/admin/dashboard#alerts'">
+            <i class="fas fa-bell" style="font-size:20px; color:var(--text-light);"></i>
+            <% if(typeof stokUyarilari !== 'undefined' && stokUyarilari.length > 0) { %>
+                <span style="position:absolute; top:-5px; right:-8px; background:#ef4444; color:white; font-size:10px; font-weight:700; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center;"><%= stokUyarilari.length %></span>
+            <% } %>
+        </div>
+        <a href="/" target="_blank" style="color:var(--text-gray); font-weight:500; font-size:14px;"><i class="fas fa-external-link-alt"></i> Mağaza</a>
+    </div>
+</div>

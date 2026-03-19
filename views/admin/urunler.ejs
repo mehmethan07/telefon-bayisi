@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ürün Yönetimi | <%= firma_adi %> Yönetim</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <%- include('partials/sidebar', { activePage: 'urunler' }) %>
+
+        <div class="admin-main">
+            <%- include('partials/topbar', { pageTitle: 'Ürün Yönetimi', pageIcon: 'fas fa-mobile-screen', badgeCount: products.length }) %>
+
+            <!-- #2 Toast -->
+            <% if (typeof success !== 'undefined' && success) { %>
+                <div class="toast toast-success"><i class="fas fa-check-circle"></i> <%= success %></div>
+            <% } %>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap: wrap; gap: 10px;">
+                <div style="display:flex; gap:10px;">
+                    <button class="btn btn-add" onclick="openModal('addModal')" style="margin:0;"><i class="fas fa-plus"></i> Yeni Ürün Ekle</button>
+                    <button class="btn" style="background:var(--card-bg); color:var(--text-main); border:1px solid var(--border-color); font-weight:600; cursor:pointer; padding:10px 16px; border-radius:8px;" onclick="exportToCSV()"><i class="fas fa-download"></i> CSV İndir</button>
+                </div>
+                <!-- #5 Admin Search -->
+                <div class="admin-search" style="margin:0;">
+                    <input type="text" id="tableSearch" placeholder="Tabloda ara..." oninput="filterTable(this.value)">
+                </div>
+            </div>
+
+            <% if (products.length === 0) { %>
+                <!-- #4 Empty State -->
+                <div class="empty-state">
+                    <i class="fas fa-box-open"></i>
+                    <h3>Henüz ürün eklenmemiş</h3>
+                    <p>İlk ürününüzü eklemek için yukarıdaki butonu kullanın.</p>
+                </div>
+            <% } else { %>
+            <table id="productsDataTable">
+                <thead>
+                    <tr>
+                        <th style="width:40px;"><input type="checkbox" id="selectAll" onclick="toggleAllCheckboxes(this)"></th>
+                        <th>ID</th>
+                        <th>Görsel</th>
+                        <th>Ürün Adı</th>
+                        <th>Marka</th>
+                        <th>Fiyat</th>
+                        <th>Stok</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody id="productTable">
+                    <% products.map((p,idx) => { %>
+                        <tr>
+                            <td><input type="checkbox" class="rowCheckbox" value="<%= p.id %>"></td>
+                            <td><%= p.id %></td>
+                            <td><img src="<%= p.image_url %>" alt="<%= p.name %>" style="width:40px; height:40px; object-fit:contain; border-radius:6px;"></td>
+                            <td style="font-weight:600;"><%= p.name %></td>
+                            <td><%= p.brand %></td>
+                            <td><%= p.price %> TL</td>
+                            <td><span class="badge-status <%= p.stock_status === 'Stokta' ? 'badge-approved' : (p.stock_status === 'Azalıyor' ? 'badge-pending' : 'badge-danger') %>" style="<%= p.stock_status === 'Tükendi' ? 'background:#fee2e2; color:#ef4444;' : '' %>"><%= p.stock_status %></span></td>
+                            <td>
+                                <button class="btn btn-edit" onclick="openEditModal('<%= p.id %>', '<%= p.name %>', '<%= p.brand %>', '<%= p.price %>', '<%= p.stock_status %>', '<%= p.image_url %>')"><i class="fas fa-edit"></i></button>
+                                <form action="/admin/urunler/<%= p.id %>/sil" method="POST" style="display:inline;" onsubmit="return confirm('Bu ürünü silmek istediğinize emin misiniz?');">
+                                    <button class="btn btn-delete"><i class="fas fa-trash"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+            <% } %>
+
+            <!-- Ekleme Modalı -->
+            <div id="addModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2><i class="fas fa-plus-circle" style="color:var(--primary); margin-right:8px;"></i> Yeni Ürün Ekle</h2>
+                        <button class="close-btn" onclick="closeModal('addModal')">&times;</button>
+                    </div>
+                    <form action="/admin/urunler/ekle" method="POST">
+                        <div class="form-group">
+                            <label>Ürün Adı</label>
+                            <input type="text" name="name" placeholder="Örn: iPhone 15 Pro Max" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Marka <span style="font-size:12px; color:var(--text-gray);">(Seç veya Yaz)</span></label>
+                            <input list="brandDict" name="brand" placeholder="Marka Seç / Yaz" autocomplete="off" required>
+                            <datalist id="brandDict">
+                                <% uniqueBrands.forEach(b => { %>
+                                    <option value="<%= b %>">
+                                <% }) %>
+                            </datalist>
+                        </div>
+                        <div class="form-group">
+                            <label>Fiyat (TL)</label>
+                            <input type="number" name="price" step="0.01" min="0" placeholder="Örn: 74999" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Stok Durumu</label>
+                            <select name="stock_status">
+                                <option value="Stokta">Stokta</option>
+                                <option value="Azalıyor">Azalıyor</option>
+                                <option value="Tükendi">Tükendi</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Görsel URL</label>
+                            <input type="text" name="image_url" value="/images/telefon.webp">
+                        </div>
+                        <button type="submit" class="btn btn-add" style="width:100%; justify-content:center; padding:12px;">Kaydet</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Düzenleme Modalı -->
+            <div id="editModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2><i class="fas fa-edit" style="color:#f59e0b; margin-right:8px;"></i> Ürün Düzenle</h2>
+                        <button class="close-btn" onclick="closeModal('editModal')">&times;</button>
+                    </div>
+                    <form id="editForm" method="POST">
+                        <div class="form-group">
+                            <label>Ürün Adı</label>
+                            <input type="text" name="name" id="edit_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Marka <span style="font-size:12px; color:var(--text-gray);">(Seç veya Yaz)</span></label>
+                            <input list="brandDict" name="brand" id="edit_brand" autocomplete="off" required>
+                        </div>
+                        <div class="form-group" id="new_brand_edit" style="display:none;">
+                            <label>Yeni Marka Adı</label>
+                            <input type="text" name="new_brand" placeholder="Örn: SONY">
+                        </div>
+                        <div class="form-group">
+                            <label>Fiyat</label>
+                            <input type="text" name="price" id="edit_price" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Stok Durumu</label>
+                            <select name="stock_status" id="edit_stock_status">
+                                <option value="Stokta">Stokta</option>
+                                <option value="Azalıyor">Azalıyor</option>
+                                <option value="Tükendi">Tükendi</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Görsel URL</label>
+                            <input type="text" name="image_url" id="edit_image_url">
+                        </div>
+                        <button type="submit" class="btn btn-edit" style="width:100%; justify-content:center; padding:12px;">Güncelle</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        function openEditModal(id, name, brand, price, stock, image) {
+            document.getElementById('editForm').action = '/admin/urunler/' + id + '/duzenle';
+            document.getElementById('edit_name').value = name;
+            document.getElementById('edit_brand').value = brand;
+            document.getElementById('edit_price').value = price;
+            document.getElementById('edit_stock_status').value = stock;
+            document.getElementById('edit_image_url').value = image;
+            openModal('editModal');
+        }
+
+        // #5 Client-side table search
+        function filterTable(query) {
+            const rows = document.querySelectorAll('#productTable tr');
+            const q = query.toLowerCase();
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(q) ? '' : 'none';
+            });
+        }
+
+        // CSV Export Data
+        function exportToCSV() {
+            const table = document.getElementById('productsDataTable');
+            let csv = [];
+            // Sadece görünen satırları ve başlıkları alalım
+            const rows = table.querySelectorAll('tr');
+            
+            for (let i = 0; i < rows.length; i++) {
+                let row = [], cols = rows[i].querySelectorAll('td, th');
+                // İlk sütun checkbox, son sütun işlemler. Bunları atlayalım. (index 1 to length-2)
+                for (let j = 1; j < cols.length - 1; j++) {
+                    // Sadece metni al, görselleri/butonları yoksay
+                    let text = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, '').trim();
+                    row.push('"' + text + '"');
+                }
+                if(row.length > 0) csv.push(row.join(','));
+            }
+
+            const csvFile = new Blob(["\uFEFF"+csv.join('\n')], {type: "text/csv;charset=utf-8;"});
+            const downloadLink = document.createElement("a");
+            downloadLink.download = "urunler_raporu.csv";
+            downloadLink.href = window.URL.createObjectURL(csvFile);
+            downloadLink.style.display = "none";
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        }
+
+        // Toplu Seçim (Bulk Select)
+        function toggleAllCheckboxes(source) {
+            const checkboxes = document.querySelectorAll('.rowCheckbox');
+            checkboxes.forEach(cb => {
+                cb.checked = source.checked;
+            });
+        }
+
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) event.target.style.display = 'none';
+        }
+    </script>
+</body>
+</html>

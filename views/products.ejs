@@ -1,0 +1,180 @@
+<%- include('partials/header') %>
+
+<section class="page-hero">
+    <span class="section-subtitle">KATALOĞUMUZ</span>
+    <h1 class="section-title">Akıllı Cihazlar & Aksesuarlar</h1>
+    <p class="section-desc">En yeni modeller, orijinal garantili ürünler ve size özel fiyatlarla.</p>
+</section>
+
+<section class="catalog-section" style="max-width:1200px; margin:40px auto; display:flex; flex-wrap:wrap; gap:30px; padding:0 20px;">
+    
+    <!-- SIDEBAR -->
+    <aside class="catalog-sidebar" style="width:260px; flex-shrink:0;">
+        <div style="background:var(--card-bg); padding:20px; border-radius:12px; border:1px solid var(--border-color); position:sticky; top:100px;">
+            <h3 style="margin-bottom:20px; font-size:18px;"><i class="fas fa-filter"></i> Filtreler</h3>
+            
+            <div class="filter-group" style="margin-bottom:25px;">
+                <h4 style="font-size:15px; margin-bottom:10px; color:var(--text-gray);">Kategori / Marka</h4>
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                    <label style="cursor:pointer;"><input type="checkbox" class="brand-filter" value="APPLE"> Apple</label>
+                    <label style="cursor:pointer;"><input type="checkbox" class="brand-filter" value="SAMSUNG"> Samsung</label>
+                    <label style="cursor:pointer;"><input type="checkbox" class="brand-filter" value="XIAOMI"> Xiaomi</label>
+                </div>
+            </div>
+
+            <div class="filter-group" style="margin-bottom:25px;">
+                <h4 style="font-size:15px; margin-bottom:10px; color:var(--text-gray);">Stok Durumu</h4>
+                <label style="cursor:pointer;"><input type="checkbox" id="stock-filter"> Sadece Stoktakiler</label>
+            </div>
+
+            <div class="filter-group">
+                <h4 style="font-size:15px; margin-bottom:10px; color:var(--text-gray);">Fiyat Aralığı</h4>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <input type="number" id="min-price" placeholder="Min" style="width:100%; padding:8px; border:1px solid var(--border-color); border-radius:6px; font-family:inherit;">
+                    <span>-</span>
+                    <input type="number" id="max-price" placeholder="Max" style="width:100%; padding:8px; border:1px solid var(--border-color); border-radius:6px; font-family:inherit;">
+                </div>
+                <button onclick="applyFilters()" class="btn-primary" style="width:100%; justify-content:center; padding:10px; margin-top:15px; font-size:14px;">Uygula</button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- CONTENT -->
+    <div class="catalog-content" style="flex:1; min-width:300px;">
+        <!-- Top bar with search and sort -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:15px; background:var(--card-bg); padding:15px 20px; border-radius:12px; border:1px solid var(--border-color);">
+            <form action="/urunler" method="GET" style="display:flex; flex:1; min-width:250px; gap:10px;" onsubmit="event.preventDefault(); applyFilters();">
+                <div style="position:relative; flex:1;">
+                    <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-gray);"></i>
+                    <input type="text" name="search" id="searchInput" placeholder="Ürün adı veya marka ara..." value="<%= typeof query !== 'undefined' ? query.search : '' %>" style="width:100%; padding:10px 10px 10px 35px; border:1px solid var(--border-color); border-radius:8px; font-size:15px; font-family:inherit;">
+                </div>
+            </form>
+            
+            <div style="display:flex; align-items:center; gap:10px;">
+                <label style="font-size:14px; font-weight:600; color:var(--text-gray);">Sırala:</label>
+                <select id="sortSelect" onchange="applySort()" style="padding:8px 12px; border:1px solid var(--border-color); border-radius:8px; font-size:14px; font-family:inherit; cursor:pointer;">
+                    <option value="varsayilan">En Yeniler (Varsayılan)</option>
+                    <option value="artan">Fiyat: Düşükten Yükseğe</option>
+                    <option value="azalan">Fiyat: Yüksekten Düşüğe</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="services-grid" id="productGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:20px;">
+            <% catalogProducts.forEach(product => { %>
+                <div class="service-card product-card" style="box-shadow:none; border:1px solid var(--border-color); display:flex; flex-direction:column;" data-brand="<%= product.brand %>" data-price="<%= product.price.replace('.','') %>" data-stock="<%= product.stock_status %>">
+                    <div class="product-image-box" style="padding:20px; flex-shrink:0;">
+                        <img src="<%= product.image_url %>" alt="<%= product.name %>" style="max-height:160px;">
+                    </div>
+                    <div style="padding:20px 20px 0 20px; flex-grow:1; display:flex; flex-direction:column;">
+                        <span class="product-brand" style="font-size:12px; font-weight:700;"><%= product.brand %></span>
+                        <h3 class="service-title product-name" style="margin-bottom:8px;"><%= product.name %></h3>
+                        <p class="product-price" style="font-size:22px; font-weight:700; color:var(--primary-accent); margin-bottom:15px;"><%= product.price %> TL</p>
+
+                        <div class="stock-indicator" style="margin-bottom:20px;">
+                            <div class="stock-dot <%= product.stock_status === 'Stokta' ? 'in-stock' : 'low-stock' %>"></div>
+                            <span class="stock-label"><%= product.stock_status %></span>
+                        </div>
+                    </div>
+
+                    <div style="padding:0 20px 20px 20px; display:flex; gap:10px; width:100%; margin-top:auto;">
+                        <form action="/sepet/ekle" method="POST" style="flex:1;">
+                            <input type="hidden" name="type" value="urun">
+                            <input type="hidden" name="id" value="<%= product.id %>">
+                            <button type="submit" class="btn-primary" style="padding:10px; width:100%; justify-content:center; background:#f1f5f9; color:var(--text-main); border:1px solid var(--border-color); font-size:13px;" title="Hızlı Ekle">
+                                <i class="fas fa-cart-plus"></i> Ekle
+                            </button>
+                        </form>
+                        <a href="/urunler/<%= product.id %>" class="btn-primary" style="flex:1; padding:10px; justify-content:center; font-size:13px;">Detay</a>
+                    </div>
+                </div>
+            <% }) %>
+            <div id="no-results" style="display:none; grid-column:1/-1; text-align:center; padding:50px 20px; background:var(--card-bg); border-radius:12px; border:1px solid var(--border-color);">
+                <i class="fas fa-search" style="font-size:40px; color:var(--text-gray); margin-bottom:15px;"></i>
+                <h3 style="margin-bottom:10px;">Ürün Bulunamadı</h3>
+                <p style="color:var(--text-gray);">Arama veya filtre kriterlerinize uyan bir cihaz kaydı bulunmuyor.</p>
+                <button onclick="clearFilters()" class="btn-primary" style="margin-top:20px;">Filtreleri Temizle</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+@media (max-width: 768px) {
+    .catalog-section { flex-direction: column; }
+    .catalog-sidebar { width: 100% !important; }
+    .catalog-sidebar > div { position: static !important; }
+}
+.product-card { transition: 0.3s; }
+.product-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.06) !important; }
+</style>
+
+<script>
+function applyFilters() {
+    const checkedBrands = Array.from(document.querySelectorAll('.brand-filter:checked')).map(cb => cb.value.toUpperCase());
+    const stockOnly = document.getElementById('stock-filter').checked;
+    const minPrice = parseInt(document.getElementById('min-price').value) || 0;
+    const maxPrice = parseInt(document.getElementById('max-price').value) || Infinity;
+    const searchVal = document.getElementById('searchInput').value.toLowerCase();
+
+    const cards = document.querySelectorAll('.product-card');
+    let visibleCount = 0;
+
+    cards.forEach(card => {
+        const brand = card.getAttribute('data-brand').toUpperCase();
+        const price = parseInt(card.getAttribute('data-price'));
+        const stock = card.getAttribute('data-stock');
+        const name = card.querySelector('.product-name').textContent.toLowerCase();
+
+        let show = true;
+
+        if(checkedBrands.length > 0 && !checkedBrands.includes(brand)) show = false;
+        if(stockOnly && stock === 'Tükendi') show = false;
+        if(price < minPrice || price > maxPrice) show = false;
+        if(searchVal && !name.includes(searchVal) && !brand.toLowerCase().includes(searchVal)) show = false;
+
+        card.style.display = show ? 'flex' : 'none';
+        if(show) visibleCount++;
+    });
+
+    document.getElementById('no-results').style.display = visibleCount === 0 ? 'block' : 'none';
+    
+    // Uyguladıktan sonra sıralamayı da koru
+    applySort();
+}
+
+function applySort() {
+    const grid = document.getElementById('productGrid');
+    const cards = Array.from(grid.querySelectorAll('.product-card'));
+    const sortType = document.getElementById('sortSelect').value;
+    const noResults = document.getElementById('no-results');
+
+    if(sortType === 'varsayilan') return;
+
+    cards.sort((a, b) => {
+        const pA = parseInt(a.getAttribute('data-price'));
+        const pB = parseInt(b.getAttribute('data-price'));
+        return sortType === 'artan' ? pA - pB : pB - pA;
+    });
+
+    cards.forEach(card => grid.appendChild(card));
+    grid.appendChild(noResults); // keep no-results at the end
+}
+
+function clearFilters() {
+    document.querySelectorAll('.brand-filter').forEach(cb => cb.checked = false);
+    document.getElementById('stock-filter').checked = false;
+    document.getElementById('min-price').value = '';
+    document.getElementById('max-price').value = '';
+    document.getElementById('searchInput').value = '';
+    document.getElementById('sortSelect').value = 'varsayilan';
+    applyFilters();
+}
+
+// Attach live search to input
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+// Attach live filter to checkboxes
+document.querySelectorAll('.brand-filter, #stock-filter').forEach(el => el.addEventListener('change', applyFilters));
+</script>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,130 @@
+:root {
+    --bg-main: #f8fafc;
+    --card-bg: #ffffff;
+    --border-color: rgba(0, 0, 0, 0.08);
+    --text-main: #0f172a;
+    --text-gray: #64748b;
+    --primary-accent: #0ea5e9;
+    --glass-bg: rgba(255, 255, 255, 0.85);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    overflow-x: hidden;
+    padding-top: 75px;
+}
+
+h1, h2, h3, h4 {
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+a {
+    text-decoration: none;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.section-subtitle {
+    color: var(--primary-accent);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.section-title {
+    font-size: 2.8rem;
+    margin: 15px 0;
+    letter-spacing: -1px;
+    color: var(--text-main);
+}
+
+.section-desc {
+    color: var(--text-gray);
+}
+
+.btn-primary {
+    background: var(--primary-accent);
+    color: white;
+    padding: 14px 28px;
+    border-radius: 8px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+.btn-primary:hover {
+    filter: brightness(0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px rgba(14, 165, 233, 0.2);
+}
+
+.page-hero {
+    background: var(--card-bg);
+    padding: 80px 5%;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.page-hero .section-desc {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+    .page-hero {
+        padding: 50px 5%;
+    }
+}
+
+/* Skeleton Loading Animation */
+.skeleton {
+    background: #e2e8f0;
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    color: transparent !important;
+}
+
+.skeleton * {
+    visibility: hidden;
+}
+
+.skeleton::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
