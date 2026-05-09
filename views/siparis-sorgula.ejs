@@ -1,0 +1,75 @@
+<%- include('partials/header') %>
+
+<section class="page-hero">
+    <span class="section-subtitle">SİPARİŞ TAKİP</span>
+    <h1 class="section-title">Ayırtma Durumu Sorgula</h1>
+    <p class="section-desc">Takip kodunuz ve telefon numaranız ile güncel sipariş durumunuzu öğrenin.</p>
+</section>
+
+<section style="max-width:820px; margin:40px auto 70px auto; padding:0 20px;">
+    <div style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:14px; padding:24px;">
+        <form action="/siparis/sorgula" method="POST" style="display:grid; grid-template-columns:1fr 1fr auto; gap:12px; align-items:end;">
+            <div>
+                <label style="display:block; margin-bottom:6px; font-weight:600; color:var(--text-main);">Takip Kodu</label>
+                <input
+                    type="text"
+                    name="tracking_code"
+                    value="<%= form && form.tracking_code ? form.tracking_code : '' %>"
+                    placeholder="SP-123456"
+                    required
+                    style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px; font-family:inherit;">
+            </div>
+            <div>
+                <label style="display:block; margin-bottom:6px; font-weight:600; color:var(--text-main);">Telefon</label>
+                <input
+                    type="tel"
+                    name="phone"
+                    value="<%= form && form.phone ? form.phone : '' %>"
+                    placeholder="05xxxxxxxxx"
+                    pattern="[0-9]{10,11}"
+                    required
+                    style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px; font-family:inherit;">
+            </div>
+            <button type="submit" class="btn-primary" style="height:46px; justify-content:center;">Sorgula</button>
+        </form>
+    </div>
+
+    <% if (error) { %>
+        <div style="margin-top:16px; background:#fee2e2; color:#b91c1c; border:1px solid #fecaca; border-radius:10px; padding:12px 14px;">
+            <i class="fas fa-circle-exclamation"></i> <%= error %>
+        </div>
+    <% } %>
+
+    <% if (result) { %>
+        <div style="margin-top:20px; background:white; border:1px solid var(--border-color); border-radius:14px; padding:22px;">
+            <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
+                <h3 style="margin:0; color:var(--text-main);">Sipariş Bilgisi</h3>
+                <span style="padding:8px 12px; border-radius:999px; font-size:13px; font-weight:700; background:<%= result.status === 'Onaylandı' ? '#dcfce7' : (result.status === 'Teslime Hazır' ? '#d1fae5' : (result.status === 'Teslim Edildi' ? '#dbeafe' : (result.status === 'İptal Edildi' ? '#fee2e2' : '#fef3c7'))) %>; color:<%= result.status === 'Onaylandı' ? '#166534' : (result.status === 'Teslime Hazır' ? '#065f46' : (result.status === 'Teslim Edildi' ? '#1e40af' : (result.status === 'İptal Edildi' ? '#991b1b' : '#92400e'))) %>;">
+                    <%= result.status %>
+                </span>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:18px; color:var(--text-main);">
+                <div><strong>Takip Kodu:</strong> <span style="font-family:monospace;"><%= result.tracking_code %></span></div>
+                <div><strong>Tarih:</strong> <%= result.date %></div>
+                <div><strong>Müşteri:</strong> <%= result.customer_name %></div>
+                <div><strong>Ödeme:</strong> <%= result.payment_method %></div>
+            </div>
+
+            <div style="border-top:1px solid var(--border-color); padding-top:14px;">
+                <h4 style="margin:0 0 12px 0; color:var(--text-main);">Ürünler</h4>
+                <% result.items.forEach(s => { %>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding:10px 12px; border:1px solid var(--border-color); border-radius:8px; background:var(--bg-main);">
+                        <span><%= s.item.name %> <span style="color:var(--text-gray);">(x<%= s.miktar %>)</span></span>
+                        <strong><%= s.item.price %> TL</strong>
+                    </div>
+                <% }) %>
+                <div style="margin-top:10px; text-align:right; font-size:1.05rem; color:var(--text-main);">
+                    Toplam: <strong><%= result.total_price %> TL</strong>
+                </div>
+            </div>
+        </div>
+    <% } %>
+</section>
+
+<%- include('partials/footer') %>

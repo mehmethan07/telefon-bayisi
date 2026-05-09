@@ -55,30 +55,6 @@
             <a href="/urunler" style="font-weight:600; color:var(--primary-accent); text-decoration:none;"><i class="fas fa-plus"></i> Ürün Ekle</a>
         </div>
         
-        <% 
-           const numericTotal = parseFloat(toplamFiyat.replace(/\./g, '').replace(',', '.'));
-           const kargoLimit = 3000;
-           const kalanKargo = kargoLimit - numericTotal;
-           const progressWidth = numericTotal >= kargoLimit ? 100 : (numericTotal / kargoLimit) * 100;
-        %>
-        <div class="shipping-bar-wrapper" style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:12px; padding:20px; margin-bottom:25px;">
-            <% if (kalanKargo > 0) { %>
-                <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:15px; font-weight:600;">
-                    <span>Ücretsiz Kargo Fırsatı</span>
-                    <span style="color:#ef4444;"><%= kalanKargo.toLocaleString('tr-TR') %> TL Kaldı</span>
-                </div>
-            <% } else { %>
-                <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:15px; font-weight:600; color:#16a34a;">
-                    <span><i class="fas fa-check-circle"></i> Ücretsiz Kargo Seçeneği Aktif!</span>
-                </div>
-            <% } %>
-            <div style="width:100%; height:12px; background:#e2e8f0; border-radius:20px; overflow:hidden;">
-                <div style="height:100%; width:<%= progressWidth %>%; background:<%= kalanKargo > 0 ? 'var(--primary-accent)' : '#16a34a' %>; transition:0.5s;"></div>
-            </div>
-            <% if (kalanKargo > 0) { %>
-                <p style="font-size:13px; color:var(--text-gray); margin-top:8px;">Sepetinize <%= kalanKargo.toLocaleString('tr-TR') %> TL'lik ürün daha ekleyin, kargo bedavaya gelsin!</p>
-            <% } %>
-        </div>
 
         <div class="cart-list">
             <% sepet.forEach(s => { %>
@@ -100,7 +76,7 @@
                         <span class="qty-value"><%= s.miktar %></span>
                         <form action="/sepet/artir/<%= s.type %>/<%= s.item.id %>" method="POST" style="margin:0;"><button type="submit" class="qty-btn">+</button></form>
                     </div>
-                    <a href="/sepet/sil/<%= s.type %>/<%= s.item.id %>" class="btn-remove" style="display:flex; align-items:center; justify-content:center; text-decoration:none;" title="Kaldır">
+                    <a href="/sepet/sil/<%= s.type %>/<%= s.item.id %>" class="btn-remove" style="display:flex; align-items:center; justify-content:center; text-decoration:none;" title="Kaldır" data-confirm data-confirm-title="Ürün kaldırılsın mı?" data-confirm-message="Bu ürünü sepetten kaldırmak istediğinize emin misiniz?" data-confirm-approve="Evet, kaldır">
                         <i class="fas fa-trash"></i>
                     </a>
                 </div>

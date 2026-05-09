@@ -10,19 +10,36 @@
     <nav class="sidebar-nav">
         <a href="/admin/dashboard" class="<%= activePage === 'dashboard' ? 'active' : '' %>"><i class="fas fa-chart-pie"></i> Özet</a>
         <a href="/admin/siparisler" class="<%= activePage === 'siparisler' ? 'active' : '' %>"><i class="fas fa-shopping-bag"></i> Siparişler</a>
+        <a href="/admin/servis" class="<%= activePage === 'servis' ? 'active' : '' %>"><i class="fas fa-screwdriver-wrench"></i> Teknik Servis</a>
         <a href="/admin/mesajlar" class="<%= activePage === 'mesajlar' ? 'active' : '' %>"><i class="fas fa-envelope"></i> Mesajlar</a>
+        <a href="/admin/raporlar" class="<%= activePage === 'raporlar' ? 'active' : '' %>"><i class="fas fa-chart-column"></i> Raporlar</a>
         <div class="sidebar-divider"></div>
         <a href="/admin/urunler" class="<%= activePage === 'urunler' ? 'active' : '' %>"><i class="fas fa-mobile-screen"></i> Ürünler</a>
         <a href="/admin/aksesuarlar" class="<%= activePage === 'aksesuarlar' ? 'active' : '' %>"><i class="fas fa-headphones"></i> Aksesuarlar</a>
+        <a href="/admin/ayarlar" class="<%= activePage === 'ayarlar' ? 'active' : '' %>"><i class="fas fa-cog"></i> Ayarlar</a>
     </nav>
     <div class="sidebar-footer" style="display:flex; flex-direction:column; gap:6px;">
         <button id="themeToggleBtn" onclick="toggleTheme()" style="background:none; border:none; text-align:left; display:flex; align-items:center; gap:10px; padding:10px 15px; color:var(--text-light); border-radius:8px; font-size:13px; font-weight:500; cursor:pointer; width:100%; transition:0.2s;" onmouseover="this.style.background='var(--bg-sidebar-hover)'; this.style.color='white'" onmouseout="this.style.background='none'; this.style.color='var(--text-light)'">
             <i class="fas fa-moon"></i> Koyu Tema
         </button>
-        <a href="/"><i class="fas fa-external-link-alt"></i> Mağazayı Görüntüle</a>
-        <a href="/admin"><i class="fas fa-sign-out-alt"></i> Çıkış Yap</a>
+        <a href="/" data-confirm data-confirm-title="Mağazaya geçilsin mi?" data-confirm-message="Yönetim panelinden çıkıp mağazayı görüntülemek üzeresiniz. Devam edilsin mi?" data-confirm-approve="Evet, geç" data-confirm-cancel="Vazgeç"><i class="fas fa-external-link-alt"></i> Mağazayı Görüntüle</a>
+        <a href="/admin" data-confirm data-confirm-title="Yönetimden çıkılsın mı?" data-confirm-message="Admin panelinden çıkış yapmak üzeresiniz. Onaylıyor musunuz?" data-confirm-approve="Evet, çık" data-confirm-cancel="Vazgeç"><i class="fas fa-sign-out-alt"></i> Çıkış Yap</a>
     </div>
 </aside>
+<div id="adminConfirmModal" style="position:fixed; inset:0; background:rgba(2,6,23,0.45); display:none; align-items:center; justify-content:center; z-index:2500; padding:16px;">
+    <div style="width:100%; max-width:460px; background:#fff; border-radius:14px; border:1px solid #e2e8f0; box-shadow:0 24px 60px rgba(2,6,23,0.22);">
+        <div style="padding:20px 20px 12px 20px; border-bottom:1px solid #e2e8f0;">
+            <h3 id="adminConfirmTitle" style="margin:0; font-size:1.05rem; color:#0f172a;">Emin misiniz?</h3>
+        </div>
+        <div style="padding:14px 20px 20px 20px;">
+            <p id="adminConfirmMessage" style="margin:0; color:#475569; line-height:1.6;">Bu işlemi gerçekleştirmek istediğinizi onaylayın.</p>
+            <div style="margin-top:18px; display:flex; justify-content:flex-end; gap:10px;">
+                <button type="button" id="adminConfirmCancel" style="padding:10px 14px; border-radius:8px; border:1px solid #cbd5e1; background:#fff; color:#334155; font-weight:600; cursor:pointer;">Vazgeç</button>
+                <button type="button" id="adminConfirmApprove" style="padding:10px 14px; border-radius:8px; border:1px solid #0284c7; background:#0ea5e9; color:#fff; font-weight:700; cursor:pointer;">Onayla</button>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
     function toggleTheme() {
         const body = document.body;
@@ -45,5 +62,77 @@
         }
         document.getElementById('themeToggleBtn').querySelector('i').style.width = '20px';
         document.getElementById('themeToggleBtn').querySelector('i').style.textAlign = 'center';
+    });
+
+    function showAdminConfirm(options = {}) {
+        const modal = document.getElementById('adminConfirmModal');
+        const titleEl = document.getElementById('adminConfirmTitle');
+        const messageEl = document.getElementById('adminConfirmMessage');
+        const okBtn = document.getElementById('adminConfirmApprove');
+        const cancelBtn = document.getElementById('adminConfirmCancel');
+
+        titleEl.textContent = options.title || 'Emin misiniz?';
+        messageEl.textContent = options.message || 'Bu işlemi gerçekleştirmek istediğinizi onaylayın.';
+        okBtn.textContent = options.confirmText || 'Onayla';
+        cancelBtn.textContent = options.cancelText || 'Vazgeç';
+        modal.style.display = 'flex';
+
+        return new Promise(resolve => {
+            const cleanup = () => {
+                modal.style.display = 'none';
+                okBtn.removeEventListener('click', onOk);
+                cancelBtn.removeEventListener('click', onCancel);
+                modal.removeEventListener('click', onBackdrop);
+            };
+            const onOk = () => { cleanup(); resolve(true); };
+            const onCancel = () => { cleanup(); resolve(false); };
+            const onBackdrop = (e) => {
+                if (e.target === modal) {
+                    cleanup();
+                    resolve(false);
+                }
+            };
+
+            okBtn.addEventListener('click', onOk);
+            cancelBtn.addEventListener('click', onCancel);
+            modal.addEventListener('click', onBackdrop);
+        });
+    }
+
+    window.showAdminConfirm = showAdminConfirm;
+
+    document.addEventListener('submit', async (e) => {
+        const form = e.target.closest('form[data-confirm]');
+        if (!form || form.dataset.confirmHandled === 'true') return;
+        e.preventDefault();
+
+        const ok = await showAdminConfirm({
+            title: form.dataset.confirmTitle || 'Emin misiniz?',
+            message: form.dataset.confirmMessage || 'Bu işlemi gerçekleştirmek istediğinizi onaylayın.',
+            confirmText: form.dataset.confirmApprove || 'Onayla',
+            cancelText: form.dataset.confirmCancel || 'Vazgeç'
+        });
+        if (!ok) return;
+
+        form.dataset.confirmHandled = 'true';
+        form.requestSubmit();
+        form.dataset.confirmHandled = 'false';
+    });
+
+    document.addEventListener('click', async (e) => {
+        const link = e.target.closest('a[data-confirm]');
+        if (!link || link.dataset.confirmHandled === 'true') return;
+        e.preventDefault();
+
+        const ok = await showAdminConfirm({
+            title: link.dataset.confirmTitle || 'Emin misiniz?',
+            message: link.dataset.confirmMessage || 'Bu işlemi gerçekleştirmek istediğinizi onaylayın.',
+            confirmText: link.dataset.confirmApprove || 'Onayla',
+            cancelText: link.dataset.confirmCancel || 'Vazgeç'
+        });
+        if (!ok) return;
+
+        link.dataset.confirmHandled = 'true';
+        window.location.href = link.href;
     });
 </script>

@@ -28,6 +28,7 @@
                             <div class="res-info">
                                 <h3 style="margin-bottom:10px;"><i class="fas fa-shopping-bag"></i> Sipariş #<%= String(res.id).slice(-6) %> - <%= res.items.length %> Ürün</h3>
                                 <p><strong>Müşteri:</strong> <%= res.customer_name %> | <strong>Tel:</strong> <%= res.phone %></p>
+                                <p style="margin-top:6px;"><strong>Takip Kodu:</strong> <span style="font-family:monospace;"><%= res.tracking_code || '-' %></span></p>
 
                                 <!-- Detayları Gör Butonu -->
                                 <button class="btn" style="background:#e0f2fe; color:#0284c7; border:1px solid #bae6fd; font-weight:600; font-size:13px; padding:6px 12px; border-radius:6px; margin: 10px 0;" data-items="<%= encodeURIComponent(JSON.stringify(res.items)) %>" data-price="<%= res.total_price %>" onclick="openOrderModal(this)">
@@ -42,10 +43,24 @@
                             
                             <div class="res-actions" style="margin-top:0; min-width: 150px; display:flex; flex-direction:column; justify-content:center; align-items:flex-end;">
                                 <form action="/admin/siparisler/<%= res.id %>/durum" method="POST">
-                                    <select name="status" onchange="this.form.submit()" style="padding:10px; border-radius:8px; font-weight:600; cursor:pointer; font-size:14px; background: <%= res.status === 'Beklemede' ? '#fffbeb' : (res.status === 'Onaylandı' ? '#f0fdf4' : '#fef2f2') %>; color: <%= res.status === 'Beklemede' ? '#d97706' : (res.status === 'Onaylandı' ? '#16a34a' : '#dc2626') %>; border: 1px solid <%= res.status === 'Beklemede' ? '#fde68a' : (res.status === 'Onaylandı' ? '#bbf7d0' : '#fecaca') %>;">
-                                        <option value="Beklemede" <%= res.status === 'Beklemede' ? 'selected' : '' %>>Beklemede</option>
-                                        <option value="Onaylandı" <%= res.status === 'Onaylandı' ? 'selected' : '' %>>Onaylandı</option>
-                                        <option value="İptal Edildi" <%= res.status === 'İptal Edildi' ? 'selected' : '' %>>İptal Edildi</option>
+                                    <select name="status" data-current="<%= res.status %>" onchange="confirmStatusChange(this)" style="padding:10px; border-radius:8px; font-weight:600; font-size:14px; background: <%= res.status === 'Beklemede' ? '#fffbeb' : (res.status === 'Onaylandı' ? '#f0fdf4' : (res.status === 'Teslime Hazır' ? '#ecfdf5' : (res.status === 'Teslim Edildi' ? '#eff6ff' : '#fef2f2'))) %>; color: <%= res.status === 'Beklemede' ? '#d97706' : (res.status === 'Onaylandı' ? '#16a34a' : (res.status === 'Teslime Hazır' ? '#047857' : (res.status === 'Teslim Edildi' ? '#1d4ed8' : '#dc2626'))) %>; border: 1px solid <%= res.status === 'Beklemede' ? '#fde68a' : (res.status === 'Onaylandı' ? '#bbf7d0' : (res.status === 'Teslime Hazır' ? '#a7f3d0' : (res.status === 'Teslim Edildi' ? '#bfdbfe' : '#fecaca'))) %>; <%= (res.status === 'Teslim Edildi' || res.status === 'İptal Edildi') ? 'cursor:not-allowed; opacity:0.8;' : 'cursor:pointer;' %>" <%= (res.status === 'Teslim Edildi' || res.status === 'İptal Edildi') ? 'disabled' : '' %>>
+                                        <% if (res.status === 'Beklemede') { %>
+                                            <option value="Beklemede" selected>Beklemede</option>
+                                            <option value="Onaylandı">Onaylandı</option>
+                                            <option value="İptal Edildi">İptal Edildi</option>
+                                        <% } else if (res.status === 'Onaylandı') { %>
+                                            <option value="Onaylandı" selected>Onaylandı</option>
+                                            <option value="Teslime Hazır">Teslime Hazır</option>
+                                            <option value="İptal Edildi">İptal Edildi</option>
+                                        <% } else if (res.status === 'Teslime Hazır') { %>
+                                            <option value="Teslime Hazır" selected>Teslime Hazır</option>
+                                            <option value="Teslim Edildi">Teslim Edildi</option>
+                                            <option value="İptal Edildi">İptal Edildi</option>
+                                        <% } else if (res.status === 'Teslim Edildi') { %>
+                                            <option value="Teslim Edildi" selected>Teslim Edildi</option>
+                                        <% } else if (res.status === 'İptal Edildi') { %>
+                                            <option value="İptal Edildi" selected>İptal Edildi</option>
+                                        <% } %>
                                     </select>
                                 </form>
                             </div>
@@ -72,6 +87,26 @@
             </div>
             
             <script>
+                async function confirmStatusChange(selectEl) {
+                    const oldStatus = selectEl.getAttribute('data-current');
+                    const newStatus = selectEl.value;
+
+                    if (oldStatus === newStatus) return;
+
+                    const ok = await showAdminConfirm({
+                        title: 'Durum güncellensin mi?',
+                        message: `Sipariş durumunu "${oldStatus}" -> "${newStatus}" olarak değiştirmek istediğinize emin misiniz?`,
+                        confirmText: 'Evet, güncelle',
+                        cancelText: 'Vazgeç'
+                    });
+                    if (!ok) {
+                        selectEl.value = oldStatus;
+                        return;
+                    }
+
+                    selectEl.form.submit();
+                }
+
                 function openOrderModal(btn) {
                     const itemsJsonString = decodeURIComponent(btn.getAttribute('data-items'));
                     const totalPrice = btn.getAttribute('data-price');

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teknik Servis | <%= firma_adi %> Yönetim</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <%- include('partials/sidebar', { activePage: 'servis' }) %>
+
+        <div class="admin-main">
+            <%- include('partials/topbar', { pageTitle: 'Teknik Servis', pageIcon: 'fas fa-screwdriver-wrench', badgeCount: requests.length }) %>
+
+            <% if (requests.length === 0) { %>
+                <div class="empty-state">
+                    <i class="fas fa-wrench"></i>
+                    <h3>Henüz servis kaydı yok</h3>
+                    <p>Müşteriler servis kaydı oluşturduğunda burada listelenecek.</p>
+                </div>
+            <% } else { %>
+                <div class="res-list">
+                    <% requests.slice().reverse().forEach(r => { %>
+                        <div class="res-card">
+                            <div class="res-info">
+                                <h3 style="margin-bottom:10px;"><i class="fas fa-wrench"></i> <%= r.device_model %></h3>
+                                <p><strong>Müşteri:</strong> <%= r.customer_name %> | <strong>Tel:</strong> <%= r.phone %></p>
+                                <p style="margin-top:6px;"><strong>Takip Kodu:</strong> <span style="font-family:monospace;"><%= r.tracking_code %></span></p>
+                                <div class="res-meta" style="margin-top:10px;">
+                                    <span><i class="far fa-clock"></i> <%= r.date %></span>
+                                    <span><i class="fas fa-tag"></i> <%= r.brand %> • <%= r.issue_type %></span>
+                                </div>
+                                <% if (r.description) { %>
+                                    <p style="margin-top:10px; color:var(--text-gray);"><strong>Açıklama:</strong> <%= r.description %></p>
+                                <% } %>
+                            </div>
+
+                            <div class="res-actions" style="margin-top:0; min-width: 170px; display:flex; flex-direction:column; justify-content:center; align-items:flex-end;">
+                                <form action="/admin/servis/<%= r.id %>/durum" method="POST">
+                                    <select name="status" data-current="<%= r.status %>" onchange="confirmServiceStatusChange(this)" style="padding:10px; border-radius:8px; font-weight:600; font-size:14px; background: <%= r.status === 'Beklemede' ? '#fffbeb' : (r.status === 'Onarımda' ? '#eff6ff' : (r.status === 'Hazır' ? '#f0fdf4' : '#fef2f2')) %>; color: <%= r.status === 'Beklemede' ? '#d97706' : (r.status === 'Onarımda' ? '#1d4ed8' : (r.status === 'Hazır' ? '#16a34a' : '#dc2626')) %>; border: 1px solid <%= r.status === 'Beklemede' ? '#fde68a' : (r.status === 'Onarımda' ? '#bfdbfe' : (r.status === 'Hazır' ? '#bbf7d0' : '#fecaca')) %>; <%= (r.status === 'Hazır' || r.status === 'İptal Edildi') ? 'cursor:not-allowed; opacity:0.8;' : 'cursor:pointer;' %>" <%= (r.status === 'Hazır' || r.status === 'İptal Edildi') ? 'disabled' : '' %>>
+                                        <% if (r.status === 'Beklemede') { %>
+                                            <option value="Beklemede" selected>Beklemede</option>
+                                            <option value="Onarımda">Onarımda</option>
+                                            <option value="İptal Edildi">İptal Edildi</option>
+                                        <% } else if (r.status === 'Onarımda') { %>
+                                            <option value="Onarımda" selected>Onarımda</option>
+                                            <option value="Hazır">Hazır</option>
+                                            <option value="İptal Edildi">İptal Edildi</option>
+                                        <% } else if (r.status === 'Hazır') { %>
+                                            <option value="Hazır" selected>Hazır</option>
+                                        <% } else if (r.status === 'İptal Edildi') { %>
+                                            <option value="İptal Edildi" selected>İptal Edildi</option>
+                                        <% } %>
+                                    </select>
+                                </form>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <script>
+        async function confirmServiceStatusChange(selectEl) {
+            const oldStatus = selectEl.getAttribute('data-current');
+            const newStatus = selectEl.value;
+            if (oldStatus === newStatus) return;
+
+            const ok = await showAdminConfirm({
+                title: 'Servis durumu güncellensin mi?',
+                message: `Servis durumunu \"${oldStatus}\" -> \"${newStatus}\" olarak değiştirmek istediğinize emin misiniz?`,
+                confirmText: 'Evet, güncelle',
+                cancelText: 'Vazgeç'
+            });
+            if (!ok) {
+                selectEl.value = oldStatus;
+                return;
+            }
+
+            selectEl.form.submit();
+        }
+    </script>
+</body>
+</html>
+

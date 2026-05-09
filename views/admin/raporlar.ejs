@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raporlar | <%= firma_adi %> Yönetim</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <%- include('partials/sidebar', { activePage: 'raporlar' }) %>
+
+        <div class="admin-main">
+            <%- include('partials/topbar', { pageTitle: 'Raporlar', pageIcon: 'fas fa-chart-column' }) %>
+
+            <div class="list-section" style="margin-bottom:18px;">
+                <div class="list-header" style="align-items:flex-start; gap:12px; flex-wrap:wrap;">
+                    <div>
+                        <h2 style="margin:0;"><i class="fas fa-filter" style="color:var(--text-light); margin-right:8px;"></i> Filtreler</h2>
+                        <p style="margin-top:6px; color:var(--text-gray); font-size:13px;">Raporlar: <strong><%= rangeLabel %></strong></p>
+                    </div>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <a class="btn" href="/admin/raporlar?preset=7d" style="background:var(--card-bg); border:1px solid var(--border-color); color:var(--text-main); font-weight:700;"><i class="far fa-calendar"></i> 7G</a>
+                        <a class="btn" href="/admin/raporlar?preset=14d" style="background:var(--card-bg); border:1px solid var(--border-color); color:var(--text-main); font-weight:700;">14G</a>
+                        <a class="btn" href="/admin/raporlar?preset=30d" style="background:var(--card-bg); border:1px solid var(--border-color); color:var(--text-main); font-weight:700;">30G</a>
+                        <a class="btn" href="/admin/raporlar?preset=this_month" style="background:var(--card-bg); border:1px solid var(--border-color); color:var(--text-main); font-weight:700;">Bu Ay</a>
+                        <a class="btn" href="/admin/raporlar?preset=last_month" style="background:var(--card-bg); border:1px solid var(--border-color); color:var(--text-main); font-weight:700;">Geçen Ay</a>
+                        <a class="btn" href="/admin/raporlar?preset=ytd" style="background:var(--card-bg); border:1px solid var(--border-color); color:var(--text-main); font-weight:700;">YTD</a>
+                    </div>
+                </div>
+
+                <form action="/admin/raporlar" method="GET" style="margin-top:14px; display:grid; grid-template-columns: repeat(6, minmax(120px, 1fr)); gap:10px; align-items:end;">
+                    <div style="grid-column: span 2;">
+                        <label style="font-size:12px; color:var(--text-gray); font-weight:700; display:block; margin-bottom:6px;">Başlangıç</label>
+                        <input type="date" name="start" value="<%= filters && filters.start ? filters.start : '' %>" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border-color); font-family:inherit;">
+                    </div>
+                    <div style="grid-column: span 2;">
+                        <label style="font-size:12px; color:var(--text-gray); font-weight:700; display:block; margin-bottom:6px;">Bitiş</label>
+                        <input type="date" name="end" value="<%= filters && filters.end ? filters.end : '' %>" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border-color); font-family:inherit;">
+                    </div>
+                    <div style="grid-column: span 1;">
+                        <label style="font-size:12px; color:var(--text-gray); font-weight:700; display:block; margin-bottom:6px;">Durum</label>
+                        <select name="status" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border-color); font-family:inherit; cursor:pointer;">
+                            <option value="all" <%= (filters && filters.status === 'all') ? 'selected' : '' %>>Hepsi</option>
+                            <option value="Beklemede" <%= (filters && filters.status === 'Beklemede') ? 'selected' : '' %>>Beklemede</option>
+                            <option value="Onaylandı" <%= (filters && filters.status === 'Onaylandı') ? 'selected' : '' %>>Onaylandı</option>
+                            <option value="Teslime Hazır" <%= (filters && filters.status === 'Teslime Hazır') ? 'selected' : '' %>>Teslime Hazır</option>
+                            <option value="Teslim Edildi" <%= (filters && filters.status === 'Teslim Edildi') ? 'selected' : '' %>>Teslim Edildi</option>
+                            <option value="İptal Edildi" <%= (filters && filters.status === 'İptal Edildi') ? 'selected' : '' %>>İptal Edildi</option>
+                        </select>
+                    </div>
+                    <div style="grid-column: span 1;">
+                        <label style="font-size:12px; color:var(--text-gray); font-weight:700; display:block; margin-bottom:6px;">Ciro</label>
+                        <label style="display:flex; gap:8px; align-items:center; padding:10px; border:1px solid var(--border-color); border-radius:8px; background:var(--bg-main); cursor:pointer;">
+                            <input type="checkbox" name="includePending" value="1" <%= (filters && filters.includePending) ? 'checked' : '' %>>
+                            <span style="font-size:13px; font-weight:700; color:var(--text-main);">Beklemede dahil</span>
+                        </label>
+                    </div>
+
+                    <div style="grid-column: 1 / -1; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-top:6px;">
+                        <div style="color:var(--text-gray); font-size:13px;">
+                            CSV: seçili filtrelerle indir
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <a class="btn" id="csvLink" href="#" style="background:#e0f2fe; color:#0284c7; border:1px solid #bae6fd; font-weight:800;"><i class="fas fa-download"></i> CSV İndir</a>
+                            <button type="submit" class="btn btn-add" style="margin:0; font-weight:800;"><i class="fas fa-magnifying-glass"></i> Uygula</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon revenue"><i class="fas fa-coins"></i></div>
+                    <div class="stat-info">
+                        <h3>Toplam Ciro</h3>
+                        <p><%= revenueTotal %> TL</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon pending"><i class="fas fa-receipt"></i></div>
+                    <div class="stat-info">
+                        <h3>Sipariş Adedi</h3>
+                        <p><%= orderCount %></p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon products"><i class="fas fa-chart-simple"></i></div>
+                    <div class="stat-info">
+                        <h3>Ortalama Sipariş</h3>
+                        <p><%= avgOrderValue %> TL</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon accessories"><i class="fas fa-percent"></i></div>
+                    <div class="stat-info">
+                        <h3>İptal Oranı</h3>
+                        <p>
+                            <%
+                                const cancelled = (statusBreakdown.find(x => x.status === 'İptal Edildi') || {}).pct || 0;
+                            %>
+                            <%= cancelled.toFixed(1) %>%
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-sections" style="margin-top:18px;">
+                <div style="display:flex; flex-direction:column; gap:18px; flex:2;">
+                    <div class="list-section" style="padding:22px;">
+                        <h2 style="font-size:18px; margin-bottom:14px; color:var(--text-main);"><i class="fas fa-chart-line" style="color:var(--text-light); margin-right:8px;"></i> Günlük Ciro</h2>
+                        <div style="position:relative; height:280px; width:100%;">
+                            <canvas id="dailyRevenueChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="list-section">
+                        <div class="list-header">
+                            <h2><i class="fas fa-table" style="color:var(--text-light); margin-right:8px;"></i> Günlük Toplamlar</h2>
+                        </div>
+                        <div style="padding:16px;">
+                            <% if (!dailyTable || dailyTable.length === 0) { %>
+                                <div class="empty-state" style="padding:20px 0;">
+                                    <i class="fas fa-calendar-xmark"></i>
+                                    <p>Seçili aralıkta ciro verisi yok.</p>
+                                </div>
+                            <% } else { %>
+                                <table style="width:100%; border-collapse:collapse;">
+                                    <thead>
+                                        <tr>
+                                            <th style="text-align:left; padding:10px; font-size:12px; color:var(--text-gray);">Tarih</th>
+                                            <th style="text-align:right; padding:10px; font-size:12px; color:var(--text-gray);">Toplam (TL)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% dailyTable.forEach(row => { %>
+                                            <tr style="border-top:1px solid var(--border-color);">
+                                                <td style="padding:10px;"><%= row.day %></td>
+                                                <td style="padding:10px; text-align:right; font-weight:700;"><%= row.total.toLocaleString('tr-TR') %></td>
+                                            </tr>
+                                        <% }) %>
+                                    </tbody>
+                                </table>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:18px; flex:1;">
+                    <div class="list-section" style="padding:18px;">
+                        <h2 style="font-size:16px; margin-bottom:12px; color:var(--text-main);"><i class="fas fa-layer-group" style="color:var(--text-light); margin-right:8px;"></i> Durum Dağılımı</h2>
+                        <div style="display:flex; flex-direction:column; gap:10px;">
+                            <% statusBreakdown.forEach(s => { %>
+                                <div style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
+                                    <span style="font-weight:700; color:var(--text-main); font-size:13px;"><%= s.status %></span>
+                                    <span style="color:var(--text-gray); font-weight:700; font-size:13px;"><%= s.count %> • <%= s.pct.toFixed(1) %>%</span>
+                                </div>
+                                <div style="height:8px; background:#e2e8f0; border-radius:999px; overflow:hidden;">
+                                    <div style="height:100%; width:<%= Math.min(100, s.pct) %>%; background:var(--primary);"></div>
+                                </div>
+                            <% }) %>
+                        </div>
+                    </div>
+
+                    <div class="list-section" style="padding:18px;">
+                        <h2 style="font-size:16px; margin-bottom:12px; color:var(--text-main);"><i class="fas fa-star" style="color:#eab308; margin-right:8px;"></i> En Çok Ciro (Ürün)</h2>
+                        <% if (!topProducts || topProducts.length === 0) { %>
+                            <div class="empty-state" style="padding:12px 0;">
+                                <i class="fas fa-box-open"></i>
+                                <p>Veri yok.</p>
+                            </div>
+                        <% } else { %>
+                            <% topProducts.forEach(([name, total], idx) => { %>
+                                <div style="display:flex; justify-content:space-between; gap:10px; padding:10px; border:1px solid var(--border-color); border-radius:10px; background:var(--bg-main); margin-bottom:10px;">
+                                    <span style="font-weight:700; color:var(--text-main); font-size:13px;"><%= idx+1 %>. <%= name %></span>
+                                    <span style="font-weight:800; color:var(--primary); font-size:13px;"><%= Math.round(total).toLocaleString('tr-TR') %> TL</span>
+                                </div>
+                            <% }) %>
+                        <% } %>
+                    </div>
+
+                    <div class="list-section" style="padding:18px;">
+                        <h2 style="font-size:16px; margin-bottom:12px; color:var(--text-main);"><i class="fas fa-medal" style="color:#f97316; margin-right:8px;"></i> En Çok Ciro (Marka/Kategori)</h2>
+                        <% if (!topBrands || topBrands.length === 0) { %>
+                            <div class="empty-state" style="padding:12px 0;">
+                                <i class="fas fa-tags"></i>
+                                <p>Veri yok.</p>
+                            </div>
+                        <% } else { %>
+                            <% topBrands.forEach(([name, total], idx) => { %>
+                                <div style="display:flex; justify-content:space-between; gap:10px; padding:10px; border:1px solid var(--border-color); border-radius:10px; background:var(--bg-main); margin-bottom:10px;">
+                                    <span style="font-weight:700; color:var(--text-main); font-size:13px;"><%= idx+1 %>. <%= name %></span>
+                                    <span style="font-weight:800; color:var(--primary); font-size:13px;"><%= Math.round(total).toLocaleString('tr-TR') %> TL</span>
+                                </div>
+                            <% }) %>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        (function() {
+            const params = new URLSearchParams(window.location.search);
+            const csvUrl = '/admin/raporlar.csv?' + params.toString();
+            const a = document.getElementById('csvLink');
+            if (a) a.href = csvUrl;
+
+            const labels = <%- dailyLabels %>;
+            const dataPoints = <%- dailyData %>;
+            const ctx = document.getElementById('dailyRevenueChart');
+            if (!ctx) return;
+
+            new Chart(ctx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Günlük Ciro (TL)',
+                        data: dataPoints,
+                        borderColor: 'rgba(14, 165, 233, 1)',
+                        backgroundColor: 'rgba(14, 165, 233, 0.12)',
+                        tension: 0.35,
+                        fill: true,
+                        pointRadius: 3,
+                        pointHoverRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
+

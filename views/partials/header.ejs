@@ -24,28 +24,107 @@
 </head>
 <body>
 
+    <!-- Mobile Overlay (Point 6) -->
+    <div class="mobile-menu-overlay"></div>
+
     <header class="main-header">
-        <a href="/" class="logo">BAYİM</a>
-        <button class="menu-toggle" onclick="document.querySelector('.main-nav').classList.toggle('open')">
-            <i class="fas fa-bars"></i>
-        </button>
+        <a href="/" class="logo"><%= firma_adi %></a>
+        
         <nav class="main-nav">
-            <a href="/" class="<%= currentPath === '/' ? 'active' : '' %>">Anasayfa</a>
-            <a href="/urunler" class="<%= currentPath.startsWith('/urunler') ? 'active' : '' %>">Cihazlar</a>
-            <a href="/aksesuarlar" class="<%= currentPath.startsWith('/aksesuarlar') ? 'active' : '' %>">Aksesuarlar</a>
-            <a href="/servis" class="<%= currentPath.startsWith('/servis') ? 'active' : '' %>">Servis</a>
-            <a href="/hakkimizda" class="<%= currentPath === '/hakkimizda' ? 'active' : '' %>">Hakkımızda</a>
+            <!-- Dropdown: Cihazlar -->
+            <div class="nav-dropdown">
+                <a href="/urunler" class="nav-link <%= currentPath.startsWith('/urunler') ? 'active' : '' %>">Cihazlar <i class="fas fa-chevron-down" style="font-size:10px; margin-left:3px;"></i></a>
+                <div class="dropdown-menu">
+                    <a href="/urunler">Tüm Cihazlar</a>
+                    <a href="/urunler?search=apple">Apple</a>
+                    <a href="/urunler?search=samsung">Samsung</a>
+                    <a href="/urunler?search=xiaomi">Xiaomi</a>
+                </div>
+            </div>
+
+            <!-- Dropdown: Aksesuarlar -->
+            <div class="nav-dropdown">
+                <a href="/aksesuarlar" class="nav-link <%= currentPath.startsWith('/aksesuarlar') ? 'active' : '' %>">Aksesuarlar <i class="fas fa-chevron-down" style="font-size:10px; margin-left:3px;"></i></a>
+                <div class="dropdown-menu">
+                    <a href="/aksesuarlar">Tüm Aksesuarlar</a>
+                    <a href="/aksesuarlar?search=kılıf">Kılıf & Koruma</a>
+                    <a href="/aksesuarlar?search=şarj">Şarj & Kablo</a>
+                    <a href="/aksesuarlar?search=kulaklık">Ses & Kulaklık</a>
+                </div>
+            </div>
+
+            <a href="/servis" class="nav-link <%= currentPath.startsWith('/servis') ? 'active' : '' %>">Servis</a>
+            <a href="/siparis/sorgula" class="nav-link <%= currentPath.startsWith('/siparis/sorgula') ? 'active' : '' %>">Sipariş Takip</a>
             <a href="/iletisim" class="nav-contact-btn <%= currentPath === '/iletisim' ? 'active' : '' %>">İletişim</a>
         </nav>
-        <div style="display: flex; align-items: center; gap: 15px;">
-            <a href="/sepet" class="cart-btn" style="position: relative; display: flex; align-items: center; justify-content: center; width: 45px; height: 45px; border-radius: 50%; background: var(--bg-main); color: var(--text-main); border: 1px solid var(--border-color); text-decoration: none; transition: 0.3s; font-size: 1.1rem;">
+
+        <!-- Right Actions Grouping (Point 1) -->
+        <div class="header-right-actions">
+            <a href="/sepet" class="cart-btn" id="headerCartBtn">
                 <i class="fas fa-shopping-cart"></i>
                 <% if (sepet_sayisi > 0) { %>
-                    <span style="position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; width: 22px; height: 22px; font-size: 11px; font-weight: 700; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white;"><%= sepet_sayisi %></span>
+                    <span class="cart-badge" id="cartBadge"><%= sepet_sayisi %></span>
                 <% } %>
             </a>
             <a href="/iletisim" class="header-btn">İletişim</a>
+            <button class="menu-toggle" id="menuToggleBtn">
+                <i class="fas fa-bars"></i>
+            </button>
         </div>
     </header>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const header = document.querySelector('.main-header');
+            const menuToggle = document.getElementById('menuToggleBtn');
+            const mainNav = document.querySelector('.main-nav');
+            const overlay = document.querySelector('.mobile-menu-overlay');
+
+            // Scroll Effect (Point 5)
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 20) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+
+            // Mobile Menu Toggle & Click Outside (Point 6)
+            function toggleMenu() {
+                mainNav.classList.toggle('open');
+                overlay.classList.toggle('active');
+                
+                const icon = menuToggle.querySelector('i');
+                if (mainNav.classList.contains('open')) {
+                    icon.classList.remove('fa-bars');
+                    icon.classList.add('fa-times');
+                } else {
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            }
+
+            menuToggle.addEventListener('click', toggleMenu);
+            overlay.addEventListener('click', toggleMenu);
+
+            // Cart Badge Animation (Point 7)
+            window.animateCartBadge = function() {
+                const badge = document.getElementById('cartBadge');
+                if (badge) {
+                    badge.classList.remove('bounce-anim');
+                    void badge.offsetWidth; // trigger reflow
+                    badge.classList.add('bounce-anim');
+                }
+            };
+
+            // Sayfa yenilenmesiyle sepete eklenen ürünler için animasyon tetikleyici
+            const currentCartSize = <%= sepet_sayisi %>;
+            const prevCartSize = sessionStorage.getItem('bayim_cart_size');
+            if (prevCartSize !== null && currentCartSize > parseInt(prevCartSize)) {
+                setTimeout(window.animateCartBadge, 300);
+            }
+            sessionStorage.setItem('bayim_cart_size', currentCartSize);
+        });
+    </script>
 
     <main class="container">

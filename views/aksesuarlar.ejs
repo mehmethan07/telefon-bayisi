@@ -16,10 +16,11 @@
             <div class="filter-group" style="margin-bottom:25px;">
                 <h4 style="font-size:15px; margin-bottom:10px; color:var(--text-gray);">Kategoriler</h4>
                 <div style="display:flex; flex-direction:column; gap:8px;">
-                    <label style="cursor:pointer;"><input type="checkbox" class="cat-filter" value="kilif"> Kılıf & Koruma</label>
-                    <label style="cursor:pointer;"><input type="checkbox" class="cat-filter" value="sarj"> Şarj & Kablo</label>
-                    <label style="cursor:pointer;"><input type="checkbox" class="cat-filter" value="kulaklik"> Ses & Kulaklık</label>
-                    <label style="cursor:pointer;"><input type="checkbox" class="cat-filter" value="diger"> Diğer</label>
+                    <% (typeof uniqueCategories !== 'undefined' ? uniqueCategories : [{code:'kilif',name:'Kılıf & Koruma'},{code:'sarj',name:'Şarj & Kablo'},{code:'kulaklik',name:'Ses & Kulaklık'},{code:'diger',name:'Diğer'}]).forEach(cat => { %>
+                        <label style="cursor:pointer;">
+                            <input type="checkbox" class="cat-filter" value="<%= cat.code %>"> <%= cat.name %>
+                        </label>
+                    <% }) %>
                 </div>
             </div>
 

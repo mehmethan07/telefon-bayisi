@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bakımdayız | <%= settings.firmaAdi %></title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --text-main: #0f172a;
+            --text-gray: #64748b;
+            --primary-accent: #0ea5e9;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            padding: 40px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+            margin: 20px;
+        }
+        .icon {
+            font-size: 80px;
+            color: var(--primary-accent);
+            margin-bottom: 30px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+        p {
+            color: var(--text-gray);
+            line-height: 1.6;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        .contact {
+            padding-top: 30px;
+            border-top: 1px solid #e2e8f0;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            background: #25D366;
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(37,211,102,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <i class="fas fa-tools icon"></i>
+        <h1>Kısa Bir Mola!</h1>
+        <p>Sizlere daha iyi hizmet verebilmek için sistemlerimizde kısa süreli bir güncelleme yapıyoruz. Lütfen daha sonra tekrar deneyin.</p>
+        
+        <% if (settings.whatsappActive && settings.whatsapp) { %>
+        <div class="contact">
+            <p style="font-size:15px; margin-bottom:15px;">Acil iletişim ve siparişleriniz için bize WhatsApp'tan ulaşabilirsiniz:</p>
+            <a href="https://wa.me/<%= settings.whatsapp %>" class="btn" target="_blank">
+                <i class="fab fa-whatsapp" style="font-size:20px;"></i> WhatsApp Destek
+            </a>
+        </div>
+        <% } %>
+    </div>
+</body>
+</html>

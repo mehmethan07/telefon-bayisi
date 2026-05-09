@@ -24,7 +24,7 @@
             <% } else { %>
                 <div class="msg-list">
                     <% mesajlar.slice().reverse().forEach(msg => { %>
-                        <div class="msg-card">
+                        <div class="msg-card" style="cursor:pointer;" onclick="openMessageModal(this)" data-name="<%= encodeURIComponent(msg.name) %>" data-subject="<%= encodeURIComponent(msg.subject) %>" data-date="<%= encodeURIComponent(msg.date) %>" data-email="<%= encodeURIComponent(msg.email || '') %>" data-phone="<%= encodeURIComponent(msg.phone || '') %>" data-message="<%= encodeURIComponent(msg.message || '') %>">
                             <div class="msg-header">
                                 <div>
                                     <span class="msg-sender"><%= msg.name %></span>
@@ -32,7 +32,7 @@
                                 </div>
                                 <span class="msg-date"><%= msg.date %></span>
                             </div>
-                            <p class="msg-body"><%= msg.message %></p>
+                            <p class="msg-body" style="display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;"><%= msg.message %></p>
                             <div class="msg-meta">
                                 <span><i class="fas fa-envelope"></i> <%= msg.email %></span>
                                 <% if (msg.phone) { %>
@@ -43,6 +43,50 @@
                     <% }) %>
                 </div>
             <% } %>
+
+            <div id="messageModal" class="modal" style="display:none;">
+                <div class="modal-content" style="max-width:620px;">
+                    <div class="modal-header">
+                        <h2><i class="fas fa-envelope-open-text" style="color:var(--primary); margin-right:8px;"></i> Mesaj Detayı</h2>
+                        <button class="close-btn" onclick="document.getElementById('messageModal').style.display = 'none';">&times;</button>
+                    </div>
+                    <div style="margin-top:14px;">
+                        <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+                            <div>
+                                <div style="font-weight:700; color:var(--text-main);" id="msgModalName"></div>
+                                <div style="color:var(--text-gray); font-size:13px;" id="msgModalMeta"></div>
+                            </div>
+                            <div style="color:var(--text-gray); font-size:13px;" id="msgModalDate"></div>
+                        </div>
+                        <div style="margin-top:12px; padding:12px 14px; border:1px solid var(--border-color); border-radius:10px; background:var(--bg-main); color:var(--text-main); font-weight:600;" id="msgModalSubject"></div>
+                        <div style="margin-top:12px; padding:14px; border:1px solid var(--border-color); border-radius:10px; background:#fff; color:var(--text-main); line-height:1.7; white-space:pre-wrap;" id="msgModalBody"></div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                function openMessageModal(card) {
+                    const d = (k) => decodeURIComponent(card.getAttribute('data-' + k) || '');
+                    const name = d('name');
+                    const subject = d('subject');
+                    const date = d('date');
+                    const email = d('email');
+                    const phone = d('phone');
+                    const message = d('message');
+
+                    document.getElementById('msgModalName').textContent = name;
+                    document.getElementById('msgModalDate').textContent = date;
+                    document.getElementById('msgModalSubject').textContent = subject;
+                    document.getElementById('msgModalBody').textContent = message;
+                    document.getElementById('msgModalMeta').textContent = [email, phone].filter(Boolean).join(' • ');
+
+                    document.getElementById('messageModal').style.display = 'flex';
+                }
+
+                window.onclick = function(event) {
+                    if (event.target && event.target.classList && event.target.classList.contains('modal')) event.target.style.display = 'none';
+                }
+            </script>
         </div>
     </div>
 </body>

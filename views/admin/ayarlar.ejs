@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Ayarları | <%= firma_adi %> Yönetim</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="/css/admin.css">
+    <style>
+        .settings-container { max-width: 900px; margin: 0 auto; padding: 20px 0; }
+        .settings-card { background: white; border-radius: 16px; border: 1px solid var(--border-color); padding: 30px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+        .settings-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
+        .settings-card-header i { font-size: 20px; color: var(--primary); }
+        .settings-card-header h2 { font-size: 18px; color: var(--text-main); margin: 0; font-weight: 700; }
+        
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 14px; }
+        .form-group input[type="text"], .form-group input[type="number"] { width: 100%; padding: 12px 15px; border: 1.5px solid var(--border-color); border-radius: 10px; font-size: 15px; transition: 0.2s; background: var(--bg-main); color: var(--text-main); }
+        .form-group input:focus { border-color: var(--primary-accent); outline: none; background: white; box-shadow: 0 0 0 4px rgba(14,165,233,0.1); }
+        .form-hint { font-size: 13px; color: var(--text-gray); margin-top: 6px; display: block; }
+        
+        /* Toggle Switch (Apple Style) */
+        .toggle-switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 34px; }
+        .toggle-slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        input:checked + .toggle-slider { background-color: #10b981; }
+        input:focus + .toggle-slider { box-shadow: 0 0 1px #10b981; }
+        input:checked + .toggle-slider:before { transform: translateX(24px); }
+        
+        .toggle-group { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border: 1.5px solid var(--border-color); border-radius: 12px; background: white; }
+        .toggle-group.danger { border-color: #fca5a5; background: #fef2f2; }
+        .toggle-group.danger input:checked + .toggle-slider { background-color: #ef4444; }
+        .toggle-info h4 { margin: 0 0 4px 0; font-size: 15px; color: var(--text-main); }
+        .toggle-info p { margin: 0; font-size: 13px; color: var(--text-gray); }
+        .toggle-group.danger .toggle-info h4 { color: #b91c1c; }
+        .toggle-group.danger .toggle-info p { color: #991b1b; }
+        
+        @media (max-width: 768px) {
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-layout">
+        <%- include('partials/sidebar', { activePage: 'ayarlar' }) %>
+
+        <div class="admin-main">
+            <%- include('partials/topbar', { pageTitle: 'Sistem Ayarları', pageIcon: 'fas fa-cog' }) %>
+
+            <% if (success) { %>
+                <div class="toast toast-success"><i class="fas fa-check-circle"></i> <%= success %></div>
+            <% } %>
+
+            <div class="settings-container">
+                <form action="/admin/ayarlar" method="POST">
+                    
+                    <!-- İletişim Ayarları -->
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <i class="fas fa-comment-dots"></i>
+                            <h2>İletişim & WhatsApp</h2>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="whatsapp">WhatsApp Numarası</label>
+                                <input type="text" id="whatsapp" name="whatsapp" value="<%= settings.whatsapp %>" placeholder="Örn: 905551234567">
+                                <span class="form-hint">Müşterilerin size ulaşacağı numara (Başında + veya 0 olmadan, ülke koduyla).</span>
+                            </div>
+                        </div>
+                        <div class="toggle-group" style="margin-top: 10px;">
+                            <div class="toggle-info">
+                                <h4>Yüzen WhatsApp Butonu</h4>
+                                <p>Sitenin sağ alt köşesindeki hızlı mesaj ikonunu aktif eder.</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="whatsappActive" <%= settings.whatsappActive ? 'checked' : '' %>>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Sosyal Medya -->
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <i class="fas fa-hashtag"></i>
+                            <h2>Sosyal Medya Bağlantıları</h2>
+                        </div>
+                        <p style="font-size:14px; color:var(--text-gray); margin-bottom:20px; margin-top:-10px;">Sitede görünmesini istediğiniz hesapları aktifleştirin ve bağlantılarını (URL) girin.</p>
+                        
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                            <!-- Instagram -->
+                            <div style="display: flex; gap: 15px; align-items: center; background: var(--bg-main); padding: 15px; border-radius: 12px; border: 1px solid var(--border-color);">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" name="instagramActive" <%= settings.instagramActive ? 'checked' : '' %>>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <div style="flex: 1;">
+                                    <label for="instagram" style="display:block; font-weight:600; margin-bottom:5px; font-size:14px;"><i class="fab fa-instagram" style="color:#e1306c;"></i> Instagram</label>
+                                    <input type="text" id="instagram" name="instagram" value="<%= settings.instagram %>" placeholder="https://instagram.com/bayim" style="width:100%; padding:10px 15px; border:1px solid var(--border-color); border-radius:8px;">
+                                </div>
+                            </div>
+
+                            <!-- Facebook -->
+                            <div style="display: flex; gap: 15px; align-items: center; background: var(--bg-main); padding: 15px; border-radius: 12px; border: 1px solid var(--border-color);">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" name="facebookActive" <%= settings.facebookActive ? 'checked' : '' %>>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <div style="flex: 1;">
+                                    <label for="facebook" style="display:block; font-weight:600; margin-bottom:5px; font-size:14px;"><i class="fab fa-facebook" style="color:#1877f2;"></i> Facebook</label>
+                                    <input type="text" id="facebook" name="facebook" value="<%= settings.facebook %>" placeholder="https://facebook.com/bayim" style="width:100%; padding:10px 15px; border:1px solid var(--border-color); border-radius:8px;">
+                                </div>
+                            </div>
+
+                            <!-- Twitter -->
+                            <div style="display: flex; gap: 15px; align-items: center; background: var(--bg-main); padding: 15px; border-radius: 12px; border: 1px solid var(--border-color);">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" name="twitterActive" <%= settings.twitterActive ? 'checked' : '' %>>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <div style="flex: 1;">
+                                    <label for="twitter" style="display:block; font-weight:600; margin-bottom:5px; font-size:14px;"><i class="fab fa-x-twitter" style="color:#000;"></i> Twitter (X)</label>
+                                    <input type="text" id="twitter" name="twitter" value="<%= settings.twitter %>" placeholder="https://x.com/bayim" style="width:100%; padding:10px 15px; border:1px solid var(--border-color); border-radius:8px;">
+                                </div>
+                            </div>
+
+                            <!-- YouTube -->
+                            <div style="display: flex; gap: 15px; align-items: center; background: var(--bg-main); padding: 15px; border-radius: 12px; border: 1px solid var(--border-color);">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" name="youtubeActive" <%= settings.youtubeActive ? 'checked' : '' %>>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <div style="flex: 1;">
+                                    <label for="youtube" style="display:block; font-weight:600; margin-bottom:5px; font-size:14px;"><i class="fab fa-youtube" style="color:#ff0000;"></i> YouTube</label>
+                                    <input type="text" id="youtube" name="youtube" value="<%= settings.youtube %>" placeholder="https://youtube.com/@bayim" style="width:100%; padding:10px 15px; border:1px solid var(--border-color); border-radius:8px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kritik Ayarlar -->
+                    <div class="settings-card" style="border-color:#fca5a5; background:#fff5f5;">
+                        <div class="settings-card-header" style="border-bottom-color:#fca5a5;">
+                            <i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i>
+                            <h2 style="color:#b91c1c;">Kritik Sistem Ayarları</h2>
+                        </div>
+                        <div class="toggle-group danger">
+                            <div class="toggle-info">
+                                <h4>Siteyi Bakım Moduna Al</h4>
+                                <p>Aktif edildiğinde müşteriler sitenizi göremez. Sadece siz yönetim paneline erişebilirsiniz.</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="maintenanceMode" <%= settings.maintenanceMode ? 'checked' : '' %>>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Kaydet Butonu -->
+                    <div style="text-align: right; margin-bottom: 50px;">
+                        <button type="submit" class="btn btn-add" style="padding: 16px 40px; font-size: 16px; border-radius: 12px; box-shadow: 0 10px 20px rgba(14,165,233,0.3);">
+                            <i class="fas fa-save"></i> Değişiklikleri Kaydet
+                        </button>
+                    </div>
+                    
+                </form>
+            </div>
+            
+        </div>
+    </div>
+</body>
+</html>

@@ -10,10 +10,14 @@
     <div class="register-wrapper">
 
         <% if (typeof success !== 'undefined' && success) { %>
-            <div class="success-box">
-                <i class="fas fa-check-circle"></i>
-                <h3>Servis Kaydınız Alındı</h3>
-                <p>En kısa sürede sizinle iletişime geçeceğiz. Takip numaranız e-posta ile gönderilecektir.</p>
+            <div class="success-box" style="text-align:center; padding: 30px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; margin-bottom: 30px;">
+                <i class="fas fa-check-circle" style="font-size:48px; color:#16a34a; margin-bottom:15px;"></i>
+                <h3 style="color:#166534; font-size:1.5rem; margin-bottom:10px;">Servis Kaydınız Başarıyla Alındı</h3>
+                <p style="color:#15803d; font-size:15px; margin-bottom:20px;">Cihazınızı mağazamıza teslim edebilirsiniz. Durumunu takip edebilmeniz için servis takip numaranız aşağıdadır:</p>
+                <div style="background: white; border: 2px dashed #86efac; padding: 15px 30px; display: inline-block; border-radius: 8px;">
+                    <span style="font-family: monospace; font-size: 24px; font-weight: bold; color: #16a34a; letter-spacing: 2px;"><%= trackingCode %></span>
+                </div>
+                <p style="color:#15803d; font-size:13px; margin-top:15px;">Lütfen bu kodu kaybetmeyiniz.</p>
             </div>
         <% } %>
 

@@ -11,12 +11,22 @@
     <div class="reserve-wrapper">
 
         <% if (typeof success !== 'undefined' && success) { %>
-            <div class="reserve-success">
-                <i class="fas fa-check-circle"></i>
-                <h3>Talebiniz Alındı</h3>
-                <p>Ürünleriniz sizin adınıza mağazamızda ayrılmıştır. <br>Lütfen en kısa sürede mağazamızı ziyaret ediniz.</p>
-                <a href="/" class="btn-primary">Anasayfaya Dön</a>
-                <a href="/iletisim" class="btn-primary" style="background:transparent; border:1px solid #16a34a; color:#16a34a; margin-left:10px;">İletişim Bilgilerimiz</a>
+            <div class="reserve-success" style="text-align:center; padding: 40px 30px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; margin-bottom: 30px;">
+                <i class="fas fa-check-circle" style="font-size:56px; color:#16a34a; margin-bottom:20px;"></i>
+                <h3 style="color:#166534; font-size:1.8rem; margin-bottom:15px; font-family:'Space Grotesk',sans-serif;">Talebiniz Başarıyla Alındı</h3>
+                <p style="color:#15803d; font-size:16px; margin-bottom:25px; line-height:1.6;">Ürünleriniz sizin adınıza mağazamızda ayrılmıştır. <br>Durumunu takip edebilmeniz için ayırtma takip kodunuz aşağıdadır:</p>
+                
+                <% if (typeof trackingCode !== 'undefined' && trackingCode) { %>
+                    <div style="background: white; border: 2px dashed #86efac; padding: 20px 40px; display: inline-block; border-radius: 12px; margin-bottom: 25px;">
+                        <span style="font-family: monospace; font-size: 28px; font-weight: 800; color: #16a34a; letter-spacing: 3px;"><%= trackingCode %></span>
+                    </div>
+                    <p style="color:#15803d; font-size:14px; margin-bottom:25px; font-weight:600;">Lütfen mağazamıza geldiğinizde bu kodu yetkiliye gösteriniz.</p>
+                <% } %>
+
+                <div style="display:flex; justify-content:center; gap:15px; flex-wrap:wrap; margin-top:10px;">
+                    <a href="/siparis/sorgula" class="btn-primary" style="padding:12px 25px;"><i class="fas fa-search" style="margin-right:8px;"></i> Sipariş Durumu Sorgula</a>
+                    <a href="/" class="btn-primary" style="background:transparent; border:2px solid #16a34a; color:#16a34a; padding:12px 25px;"><i class="fas fa-home" style="margin-right:8px;"></i> Anasayfaya Dön</a>
+                </div>
             </div>
         <% } else { %>
             <% if (typeof error !== 'undefined' && error) { %>
@@ -59,7 +69,7 @@
                     <h2>Müşteri Bilgileri</h2>
                     <p>Lütfen siparişinizi mağazadan teslim alırken doğrulama yapabilmemiz için bilgilerinizi girin.</p>
 
-                    <form action="/siparis/tamamla" method="POST">
+                    <form action="/siparis/tamamla" method="POST" data-confirm data-confirm-title="Sipariş tamamlansın mı?" data-confirm-message="Siparişi onaylayıp ayırtma talebi göndermek istediğinize emin misiniz?" data-confirm-approve="Evet, tamamla">
                         <div class="form-field">
                             <label>Ad Soyad <span>*</span></label>
                             <input type="text" name="customer_name" class="form-input" placeholder="Adınız Soyadınız" required>
