@@ -155,10 +155,10 @@
                             <% statusBreakdown.forEach(s => { %>
                                 <div style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
                                     <span style="font-weight:700; color:var(--text-main); font-size:13px;"><%= s.status %></span>
-                                    <span style="color:var(--text-gray); font-weight:700; font-size:13px;"><%= s.count %> • <%= s.pct.toFixed(1) %>%</span>
+                                    <span style="color:var(--text-gray); font-weight:700; font-size:13px;"><%= s.count %> • <%= (s.pct || 0).toFixed(1) %>%</span>
                                 </div>
                                 <div style="height:8px; background:#e2e8f0; border-radius:999px; overflow:hidden;">
-                                    <div style="height:100%; width:<%= Math.min(100, s.pct) %>%; background:var(--primary);"></div>
+                                    <div style="height:100%; width:<%= Math.min(100, (s.pct || 0)) %>%; background:var(--primary);"></div>
                                 </div>
                             <% }) %>
                         </div>
@@ -172,10 +172,10 @@
                                 <p>Veri yok.</p>
                             </div>
                         <% } else { %>
-                            <% topProducts.forEach(([name, total], idx) => { %>
+                            <% topProducts.forEach((p, idx) => { %>
                                 <div style="display:flex; justify-content:space-between; gap:10px; padding:10px; border:1px solid var(--border-color); border-radius:10px; background:var(--bg-main); margin-bottom:10px;">
-                                    <span style="font-weight:700; color:var(--text-main); font-size:13px;"><%= idx+1 %>. <%= name %></span>
-                                    <span style="font-weight:800; color:var(--primary); font-size:13px;"><%= Math.round(total).toLocaleString('tr-TR') %> TL</span>
+                                    <span style="font-weight:700; color:var(--text-main); font-size:13px;"><%= idx+1 %>. <%= p.name %></span>
+                                    <span style="font-weight:800; color:var(--primary); font-size:13px;"><%= Math.round(p.sales).toLocaleString('tr-TR') %> TL</span>
                                 </div>
                             <% }) %>
                         <% } %>
@@ -189,10 +189,10 @@
                                 <p>Veri yok.</p>
                             </div>
                         <% } else { %>
-                            <% topBrands.forEach(([name, total], idx) => { %>
+                            <% topBrands.forEach((b, idx) => { %>
                                 <div style="display:flex; justify-content:space-between; gap:10px; padding:10px; border:1px solid var(--border-color); border-radius:10px; background:var(--bg-main); margin-bottom:10px;">
-                                    <span style="font-weight:700; color:var(--text-main); font-size:13px;"><%= idx+1 %>. <%= name %></span>
-                                    <span style="font-weight:800; color:var(--primary); font-size:13px;"><%= Math.round(total).toLocaleString('tr-TR') %> TL</span>
+                                    <span style="font-weight:700; color:var(--text-main); font-size:13px;"><%= idx+1 %>. <%= b.brand %></span>
+                                    <span style="font-weight:800; color:var(--primary); font-size:13px;"><%= Math.round(b.sales).toLocaleString('tr-TR') %> TL</span>
                                 </div>
                             <% }) %>
                         <% } %>
