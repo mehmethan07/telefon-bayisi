@@ -18,11 +18,40 @@
             <h3 class="tracking-title">
                 <i class="fas fa-search"></i> Servis Sorgula
             </h3>
-            <form class="tracking-form">
-                <input type="text" class="tracking-input" placeholder="Servis Takip No (Örn: SRV-123456)">
+            <form class="tracking-form" action="/servis/sorgula" method="POST">
+                <input
+                    type="text"
+                    name="tracking_code"
+                    class="tracking-input"
+                    placeholder="Servis Takip No (Örn: SRV-123456)"
+                    value="<%= form && form.tracking_code ? form.tracking_code : '' %>"
+                    required>
                 <button type="submit" class="btn-primary">Sorgula</button>
             </form>
         </div>
+
+        <% if (error) { %>
+            <div style="margin-top:16px; background:#fee2e2; color:#b91c1c; border:1px solid #fecaca; border-radius:10px; padding:12px 14px;">
+                <i class="fas fa-circle-exclamation"></i> <%= error %>
+            </div>
+        <% } %>
+
+        <% if (result) { %>
+            <div style="margin-top:20px; background:#fff; border:1px solid var(--border-color); border-radius:14px; padding:20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+                    <h3 style="margin:0; color:var(--text-main);">Servis Kaydı Bulundu</h3>
+                    <span style="padding:6px 10px; border-radius:999px; font-size:12px; font-weight:700; background:#f8fafc; color:#334155;"><%= result.status %></span>
+                </div>
+                <div style="margin-top:12px; color:var(--text-main); line-height:1.7;">
+                    <div><strong>Takip Kodu:</strong> <span style="font-family:monospace;"><%= result.tracking_code %></span></div>
+                    <div><strong>Müşteri:</strong> <%= result.customer_name %> (<%= result.phone %>)</div>
+                    <div><strong>Cihaz:</strong> <%= result.brand %> - <%= result.device_model %></div>
+                    <div><strong>Arıza Türü:</strong> <%= result.issue_type %></div>
+                    <% if (result.description) { %><div><strong>Açıklama:</strong> <%= result.description %></div><% } %>
+                    <div><strong>Tarih:</strong> <%= result.date %></div>
+                </div>
+            </div>
+        <% } %>
 
     </div>
 </section>

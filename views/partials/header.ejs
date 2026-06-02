@@ -66,7 +66,6 @@
                     <span class="cart-badge" id="cartBadge"><%= sepet_sayisi %></span>
                 <% } %>
             </a>
-            <a href="/iletisim" class="header-btn">İletişim</a>
             <button class="menu-toggle" id="menuToggleBtn">
                 <i class="fas fa-bars"></i>
             </button>
@@ -118,7 +117,8 @@
             };
 
             // Sayfa yenilenmesiyle sepete eklenen ürünler için animasyon tetikleyici
-            const currentCartSize = <%= sepet_sayisi %>;
+            const badgeEl = document.getElementById('cartBadge');
+            const currentCartSize = badgeEl ? parseInt(badgeEl.textContent || '0', 10) : 0;
             const prevCartSize = sessionStorage.getItem('bayim_cart_size');
             if (prevCartSize !== null && currentCartSize > parseInt(prevCartSize)) {
                 setTimeout(window.animateCartBadge, 300);

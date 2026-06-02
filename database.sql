@@ -18,7 +18,7 @@ CREATE TABLE devices (
     name VARCHAR(150) NOT NULL,
     brand VARCHAR(100) NOT NULL,
     price NUMERIC(10, 2) NOT NULL CHECK (price >= 0),
-    stock_status VARCHAR(50) DEFAULT 'Stokta',
+    stock_status VARCHAR(50) DEFAULT 'Stokta' CHECK (stock_status IN ('Stokta', 'Azalıyor', 'Tükendi')),
     image_url VARCHAR(255) DEFAULT '/images/telefon.webp',
     is_featured BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE RESTRICT
@@ -30,7 +30,7 @@ CREATE TABLE accessories (
     name VARCHAR(150) NOT NULL,
     brand VARCHAR(100) NOT NULL,
     price NUMERIC(10, 2) NOT NULL CHECK (price >= 0),
-    stock_status VARCHAR(50) DEFAULT 'Stokta',
+    stock_status VARCHAR(50) DEFAULT 'Stokta' CHECK (stock_status IN ('Stokta', 'Azalıyor', 'Tükendi')),
     image_url VARCHAR(255) DEFAULT '/images/aksesuar.webp',
     is_featured BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE RESTRICT
@@ -48,8 +48,8 @@ CREATE TABLE customers (
 CREATE TABLE orders (
     id SERIAL PRIMARY KEY,
     customer_id INTEGER NOT NULL,
-    tracking_code VARCHAR(50) UNIQUE NOT NULL,
-    payment_method VARCHAR(50) NOT NULL,
+    tracking_code VARCHAR(50) UNIQUE NOT NULL CHECK (tracking_code ~ '^SP-[0-9]{6}$'),
+    payment_method VARCHAR(50) NOT NULL CHECK (payment_method IN ('Kredi Kartı', 'Nakit', 'Havale/EFT')),
     status VARCHAR(50) DEFAULT 'Beklemede' CHECK (status IN ('Beklemede', 'Onaylandı', 'Teslime Hazır', 'Teslim Edildi', 'İptal Edildi')),
     total_price NUMERIC(12, 2) NOT NULL DEFAULT 0 CHECK (total_price >= 0),
     order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -72,12 +72,12 @@ CREATE TABLE order_items (
 CREATE TABLE service_requests (
     id SERIAL PRIMARY KEY,
     customer_id INTEGER NOT NULL,
-    tracking_code VARCHAR(50) UNIQUE NOT NULL,
+    tracking_code VARCHAR(50) UNIQUE NOT NULL CHECK (tracking_code ~ '^SRV-[0-9]{6}$'),
     brand VARCHAR(100) NOT NULL,
     device_model VARCHAR(100) NOT NULL,
     issue_type VARCHAR(100) NOT NULL,
     description TEXT,
-    status VARCHAR(50) DEFAULT 'Beklemede',
+    status VARCHAR(50) DEFAULT 'Beklemede' CHECK (status IN ('Beklemede', 'Onarımda', 'Parça Bekleniyor', 'Tamamlandı', 'İptal')),
     request_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
 );
@@ -91,6 +91,41 @@ CREATE TABLE messages (
     message TEXT NOT NULL,
     sent_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- 1.1 MEVCUT VERITABANI ICIN MIGRATION (Idempotent)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'devices_stock_status_check') THEN
+        ALTER TABLE devices ADD CONSTRAINT devices_stock_status_check
+        CHECK (stock_status IN ('Stokta', 'Azalıyor', 'Tükendi'));
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'accessories_stock_status_check') THEN
+        ALTER TABLE accessories ADD CONSTRAINT accessories_stock_status_check
+        CHECK (stock_status IN ('Stokta', 'Azalıyor', 'Tükendi'));
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'orders_tracking_code_check') THEN
+        ALTER TABLE orders ADD CONSTRAINT orders_tracking_code_check
+        CHECK (tracking_code ~ '^SP-[0-9]{6}$');
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'orders_payment_method_check') THEN
+        ALTER TABLE orders ADD CONSTRAINT orders_payment_method_check
+        CHECK (payment_method IN ('Kredi Kartı', 'Nakit', 'Havale/EFT'));
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'service_requests_tracking_code_check') THEN
+        ALTER TABLE service_requests ADD CONSTRAINT service_requests_tracking_code_check
+        CHECK (tracking_code ~ '^SRV-[0-9]{6}$');
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'service_requests_status_check') THEN
+        ALTER TABLE service_requests ADD CONSTRAINT service_requests_status_check
+        CHECK (status IN ('Beklemede', 'Onarımda', 'Parça Bekleniyor', 'Tamamlandı', 'İptal'));
+    END IF;
+END
+$$;
 
 -- 2. İNDEKSLER (INDEX)
 -- Sorguları hızlandırmak için sık aranan sütunlara indeks ekliyoruz.
@@ -141,10 +176,10 @@ BEGIN
     SET total_price = (
         SELECT COALESCE(SUM(quantity * unit_price), 0)
         FROM order_items
-        WHERE order_id = NEW.order_id
+        WHERE order_id = COALESCE(NEW.order_id, OLD.order_id)
     )
-    WHERE id = NEW.order_id;
-    RETURN NEW;
+    WHERE id = COALESCE(NEW.order_id, OLD.order_id);
+    RETURN COALESCE(NEW, OLD);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -218,70 +253,8 @@ INSERT INTO accessories (category_id, name, brand, price, stock_status, is_featu
 (3, 'Type-C Örgü Kablo', 'BASEUS', 199.00, 'Stokta', FALSE),
 (5, 'Galaxy Watch 6', 'SAMSUNG', 5999.00, 'Stokta', TRUE);
 
--- Müşteriler (10)
-INSERT INTO customers (first_name, last_name, phone, email) VALUES
-('Ahmet', 'Yılmaz', '5551112233', 'ahmet@example.com'),
-('Mehmet', 'Kaya', '5552223344', 'mehmet@example.com'),
-('Ayşe', 'Demir', '5553334455', 'ayse@example.com'),
-('Fatma', 'Çelik', '5554445566', 'fatma@example.com'),
-('Ali', 'Şahin', '5555556677', 'ali@example.com'),
-('Veli', 'Öztürk', '5556667788', 'veli@example.com'),
-('Hasan', 'Aydın', '5557778899', 'hasan@example.com'),
-('Hüseyin', 'Arslan', '5558889900', 'huseyin@example.com'),
-('Zeynep', 'Erdoğan', '5559990011', 'zeynep@example.com'),
-('Elif', 'Yıldırım', '5550001122', 'elif@example.com');
-
--- Siparişler (10)
-INSERT INTO orders (customer_id, tracking_code, payment_method, status, total_price) VALUES
-(1, 'SP-100001', 'Kredi Kartı', 'Onaylandı', 75898.00),
-(2, 'SP-100002', 'Nakit', 'Beklemede', 18499.00),
-(3, 'SP-100003', 'Havale/EFT', 'Teslime Hazır', 7499.00),
-(4, 'SP-100004', 'Kredi Kartı', 'Teslim Edildi', 69999.00),
-(5, 'SP-100005', 'Nakit', 'İptal Edildi', 899.00),
-(6, 'SP-100006', 'Kredi Kartı', 'Onaylandı', 5999.00),
-(7, 'SP-100007', 'Havale/EFT', 'Beklemede', 549.00),
-(8, 'SP-100008', 'Kredi Kartı', 'Teslim Edildi', 74999.00),
-(9, 'SP-100009', 'Nakit', 'Onaylandı', 449.00),
-(10, 'SP-100010', 'Kredi Kartı', 'Teslime Hazır', 199.00);
-
--- Sipariş Kalemleri (10+)
-INSERT INTO order_items (order_id, device_id, accessory_id, quantity, unit_price) VALUES
-(1, 1, NULL, 1, 74999.00), (1, NULL, 1, 1, 899.00),
-(2, 3, NULL, 1, 18499.00),
-(3, NULL, 3, 1, 7499.00),
-(4, 2, NULL, 1, 69999.00),
-(5, NULL, 1, 1, 899.00),
-(6, NULL, 7, 1, 5999.00),
-(7, NULL, 2, 1, 549.00),
-(8, 1, NULL, 1, 74999.00),
-(9, NULL, 5, 1, 449.00),
-(10, NULL, 6, 1, 199.00);
-
--- Servis Talepleri (10)
-INSERT INTO service_requests (customer_id, tracking_code, brand, device_model, issue_type, description, status) VALUES
-(1, 'SRV-200001', 'Apple', 'iPhone 13', 'Ekran Kırık', 'Düşme sonucu ekran parçalandı', 'Beklemede'),
-(2, 'SRV-200002', 'Samsung', 'A54', 'Batarya Değişimi', 'Şarj çabuk bitiyor', 'Onarımda'),
-(3, 'SRV-200003', 'Xiaomi', 'Note 11', 'Yazılım', 'Logo ekranında kalıyor', 'Tamamlandı'),
-(4, 'SRV-200004', 'Apple', 'iPhone 11', 'Kamera', 'Arka kamera odaklamıyor', 'Parça Bekleniyor'),
-(5, 'SRV-200005', 'Samsung', 'S22', 'Şarj Soketi', 'Temassızlık var', 'Onarımda'),
-(6, 'SRV-200006', 'Huawei', 'P40', 'Ekran Kırık', 'Dokunmatik çalışmıyor', 'Beklemede'),
-(7, 'SRV-200007', 'Apple', 'iPad Air', 'Batarya Değişimi', 'Şişme var', 'Tamamlandı'),
-(8, 'SRV-200008', 'Oppo', 'Reno 5', 'Mikrofon', 'Ses karşıya gitmiyor', 'Beklemede'),
-(9, 'SRV-200009', 'Xiaomi', 'Poco X3', 'Anakart', 'Hiç açılmıyor', 'İptal'),
-(10, 'SRV-200010', 'Apple', 'iPhone 14', 'Arka Cam', 'Arka cam çatlak', 'Onarımda');
-
--- İletişim Mesajları (10)
-INSERT INTO messages (name, phone, email, subject, message) VALUES
-('Kemal Sunal', '5551234567', 'kemal@test.com', 'Teşekkür', 'Hizmetinizden çok memnun kaldım.'),
-('Şener Şen', '5557654321', 'sener@test.com', 'Şikayet', 'Siparişim geç geldi.'),
-('Adile Naşit', '5551112222', 'adile@test.com', 'Soru', 'İndirimleriniz ne zaman başlıyor?'),
-('Münir Özkul', '5553334444', 'munir@test.com', 'Servis', 'Servis süreci kaç gün sürer?'),
-('Halit Akçatepe', '5555556666', 'halit@test.com', 'Garanti', 'Ürünlerin garantisi kaç yıl?'),
-('Tarık Akan', '5557778888', 'tarik@test.com', 'İade', 'Ürünü iade edebilir miyim?'),
-('Türkan Şoray', '5559990000', 'turkan@test.com', 'Toptan', 'Toptan alımlarda indirim var mı?'),
-('Filiz Akın', '5552221111', 'filiz@test.com', 'Kargo', 'Hangi kargo şirketiyle çalışıyorsunuz?'),
-('Hülya Koçyiğit', '5554443333', 'hulya@test.com', 'Mağaza', 'Şubeniz nerede bulunuyor?'),
-('Fatma Girik', '5556665555', 'fatmagirik@test.com', 'Ürün', 'iPhone 15 stoklarda var mı?');
+-- DEMO VERİLERİ (müşteri/sipariş/servis/mesaj) KALDIRILDI
+-- Kategori ve ürünler seed edilir; müşteri/sipariş/servis/mesaj verileri uygulama üzerinden oluşturulur.
 
 -- Admin Kullanıcısı (Sadece 1 adet)
 CREATE TABLE admins (
@@ -290,5 +263,8 @@ CREATE TABLE admins (
     password VARCHAR(255) NOT NULL
 );
 
-INSERT INTO admins (username, password) VALUES ('admin', '123456');
+-- Varsayılan admin (123456) hashli seed, varsa tekrar eklemez
+INSERT INTO admins (username, password)
+VALUES ('admin', '$2b$12$4sWztVX1vYU2bFT67iI.neE7i93H2rdW8brIHLsrvWPsmMSinJa12')
+ON CONFLICT (username) DO NOTHING;
 

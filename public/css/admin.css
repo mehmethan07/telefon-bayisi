@@ -50,6 +50,19 @@ body.dark-mode .list-header h2, body.dark-mode .item-title { color: #f8fafc; }
 body.dark-mode .item-desc { color: #94a3b8; }
 body.dark-mode .list-header, body.dark-mode .list-item { border-color: rgba(255,255,255,0.05); }
 body.dark-mode .item-icon { background: #0f172a; color: #cbd5e1; }
+body.dark-mode .topbar-actions a:hover { background: #0f172a; color: #f8fafc; }
+body.dark-mode .admin-confirm-card {
+    background: #1e293b;
+    border-color: rgba(255,255,255,0.08);
+}
+body.dark-mode .admin-confirm-header { border-bottom-color: rgba(255,255,255,0.08); }
+body.dark-mode .admin-confirm-title { color: #f8fafc; }
+body.dark-mode .admin-confirm-message { color: #cbd5e1; }
+body.dark-mode .admin-confirm-cancel {
+    background: #0f172a;
+    border-color: rgba(255,255,255,0.15);
+    color: #e2e8f0;
+}
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -228,6 +241,24 @@ body.login-page {
     transition: 0.2s;
 }
 .sidebar-footer a:hover { background: var(--bg-sidebar-hover); color: white; }
+.sidebar-theme-btn {
+    background: none;
+    border: none;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    color: var(--text-light);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    width: 100%;
+    transition: 0.2s;
+}
+.sidebar-theme-btn:hover { background: var(--bg-sidebar-hover); color: white; }
+.theme-toggle-icon { width: 20px; text-align: center; }
 
 .admin-main {
     flex: 1;
@@ -266,6 +297,13 @@ body.login-page {
     transition: 0.2s;
 }
 .topbar-actions a:hover { background: #f1f5f9; color: var(--text-dark); }
+.topbar-bell-btn {
+    position: relative;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+}
 
 /* Mobile sidebar toggle */
 .sidebar-toggle {
@@ -284,6 +322,10 @@ table {
     overflow: hidden;
     box-shadow: 0 4px 6px rgba(0,0,0,0.03);
     animation: fadeIn 0.3s ease;
+}
+.table-wrap {
+    width: 100%;
+    overflow-x: auto;
 }
 th, td { padding: 15px; text-align: left; border-bottom: 1px solid #f1f5f9; }
 th { background: #f8fafc; font-weight: 600; color: #475569; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -347,6 +389,52 @@ tbody tr:hover { background: #f0f9ff; }
 .modal-header h2 { margin: 0; font-size: 1.1rem; font-family: 'Space Grotesk', sans-serif; }
 .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light); transition: 0.2s; }
 .close-btn:hover { color: var(--danger); }
+
+/* ===== ADMIN CONFIRM MODAL ===== */
+.admin-confirm-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2500;
+    padding: 16px;
+}
+.admin-confirm-card {
+    width: 100%;
+    max-width: 460px;
+    background: #fff;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 24px 60px rgba(2, 6, 23, 0.22);
+}
+.admin-confirm-header {
+    padding: 20px 20px 12px 20px;
+    border-bottom: 1px solid #e2e8f0;
+}
+.admin-confirm-title { margin: 0; font-size: 1.05rem; color: #0f172a; }
+.admin-confirm-body { padding: 14px 20px 20px 20px; }
+.admin-confirm-message { margin: 0; color: #475569; line-height: 1.6; }
+.admin-confirm-actions { margin-top: 18px; display: flex; justify-content: flex-end; gap: 10px; }
+.admin-confirm-cancel {
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    color: #334155;
+    font-weight: 600;
+    cursor: pointer;
+}
+.admin-confirm-approve {
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #0284c7;
+    background: #0ea5e9;
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+}
 
 /* ===== TOAST NOTIFICATIONS ===== */
 .toast {
@@ -492,6 +580,7 @@ tbody tr:hover { background: #f0f9ff; }
 .badge-status { font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
 .badge-pending { background: var(--warning-bg); color: var(--warning); }
 .badge-approved { background: var(--success-bg); color: var(--success); }
+.badge-out { background: #fee2e2; color: #ef4444; }
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
@@ -501,9 +590,10 @@ tbody tr:hover { background: #f0f9ff; }
     .sidebar-toggle { display: block; }
     .admin-sidebar { transform: translateX(-100%); }
     .admin-sidebar.open { transform: translateX(0); }
-    .admin-main { margin-left: 0; padding: 20px 15px; }
+    .admin-main { margin-left: 0; padding: 20px 15px; overflow-x: auto; }
     .res-card { flex-direction: column; gap: 20px; align-items: flex-start; }
     .stats-grid { grid-template-columns: 1fr 1fr; }
+    th, td { white-space: nowrap; }
 }
 @media (max-width: 480px) {
     .stats-grid { grid-template-columns: 1fr; }

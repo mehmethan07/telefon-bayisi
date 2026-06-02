@@ -24,9 +24,19 @@
                     <button class="btn btn-add" onclick="openModal('addModal')" style="margin:0;"><i class="fas fa-plus"></i> Yeni Aksesuar Ekle</button>
                     <button class="btn" style="background:var(--card-bg); color:var(--text-main); border:1px solid var(--border-color); font-weight:600; cursor:pointer; padding:10px 16px; border-radius:8px;" onclick="exportToCSV()"><i class="fas fa-download"></i> CSV İndir</button>
                 </div>
-                <div class="admin-search" style="margin:0;">
-                    <input type="text" id="tableSearch" placeholder="Tabloda ara..." oninput="filterTable(this.value)">
-                </div>
+                <form class="admin-search" style="margin:0;" method="GET" action="/admin/aksesuarlar">
+                    <input type="text" id="tableSearch" name="search" placeholder="Aksesuar, kategori veya marka ara..." value="<%= (filters && filters.search) ? filters.search : '' %>">
+                    <select name="sort" style="padding:10px; border:1.5px solid #e2e8f0; border-radius:8px; font-family:inherit;">
+                        <option value="newest" <%= (filters && filters.sort === 'newest') ? 'selected' : '' %>>En Yeni</option>
+                        <option value="oldest" <%= (filters && filters.sort === 'oldest') ? 'selected' : '' %>>En Eski</option>
+                        <option value="name_asc" <%= (filters && filters.sort === 'name_asc') ? 'selected' : '' %>>İsim (A-Z)</option>
+                        <option value="name_desc" <%= (filters && filters.sort === 'name_desc') ? 'selected' : '' %>>İsim (Z-A)</option>
+                        <option value="price_asc" <%= (filters && filters.sort === 'price_asc') ? 'selected' : '' %>>Fiyat (Artan)</option>
+                        <option value="price_desc" <%= (filters && filters.sort === 'price_desc') ? 'selected' : '' %>>Fiyat (Azalan)</option>
+                        <option value="featured" <%= (filters && filters.sort === 'featured') ? 'selected' : '' %>>Öne Çıkan Üstte</option>
+                    </select>
+                    <button class="btn btn-add" type="submit" style="margin:0;"><i class="fas fa-filter"></i> Uygula</button>
+                </form>
             </div>
 
             <% if (aksesuarlar.length === 0) { %>
@@ -36,45 +46,79 @@
                     <p>İlk aksesuarınızı eklemek için yukarıdaki butonu kullanın.</p>
                 </div>
             <% } else { %>
-            <table id="aksesuarDataTable">
-                <thead>
-                    <tr>
-                        <th style="width:40px;"><input type="checkbox" id="selectAll" onclick="toggleAllCheckboxes(this)"></th>
-                        <th>ID</th>
-                        <th>İkon</th>
-                        <th>Öne Çıkan</th>
-                        <th>Aksesuar Adı</th>
-                        <th>Kategori</th>
-                        <th>Fiyat</th>
-                        <th>İşlemler</th>
-                    </tr>
-                </thead>
-                <tbody id="aksTable">
-                    <% aksesuarlar.map((a,idx) => { %>
+            <div class="table-wrap">
+                <table id="aksesuarDataTable">
+                    <thead>
                         <tr>
-                            <td><input type="checkbox" class="rowCheckbox" value="<%= a.id %>"></td>
-                            <td><%= a.id %></td>
-                            <td><i class="<%= a.icon %>" style="font-size:22px; color:var(--primary);"></i></td>
-                            <td style="text-align:center;">
-                                <% if(a.is_featured) { %>
-                                    <i class="fas fa-star" style="color:#f59e0b;" title="Öne Çıkan"></i>
-                                <% } else { %>
-                                    <i class="far fa-star" style="color:var(--border-color);" title="Normal"></i>
-                                <% } %>
-                            </td>
-                            <td style="font-weight:600;"><%= a.name %></td>
-                            <td><%= a.category %></td>
-                            <td><%= a.price %> TL</td>
-                            <td>
-                                <button class="btn btn-edit" onclick="openEditModal('<%= a.id %>', '<%= a.name %>', '<%= a.category %>', '<%= a.price %>', '<%= a.icon %>', <%= !!a.is_featured %>)"><i class="fas fa-edit"></i></button>
-                                <form action="/admin/aksesuarlar/<%= a.id %>/sil" method="POST" style="display:inline;" data-confirm data-confirm-title="Aksesuar silinsin mi?" data-confirm-message="Bu aksesuarı silerseniz geri almak zor olabilir. Devam etmek istiyor musunuz?" data-confirm-approve="Evet, sil">
-                                    <button class="btn btn-delete"><i class="fas fa-trash"></i></button>
-                                </form>
-                            </td>
+                            <th style="width:40px;"><input type="checkbox" id="selectAll" onclick="toggleAllCheckboxes(this)"></th>
+                            <th>ID</th>
+                            <th>İkon</th>
+                            <th>Öne Çıkan</th>
+                            <th>Aksesuar Adı</th>
+                            <th>Kategori</th>
+                            <th>Fiyat</th>
+                            <th>Stok</th>
+                            <th>İşlemler</th>
                         </tr>
-                    <% }) %>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody id="aksTable">
+                        <% aksesuarlar.map((a,idx) => { %>
+                            <tr>
+                                <td><input type="checkbox" class="rowCheckbox" value="<%= a.id %>"></td>
+                                <td><%= a.id %></td>
+                                <td><i class="<%= a.icon %>" style="font-size:22px; color:var(--primary);"></i></td>
+                                <td style="text-align:center;">
+                                    <form action="/admin/aksesuarlar/<%= a.id %>/one-cikar" method="POST" style="display:inline;">
+                                        <button class="btn" type="submit" title="Öne çıkar / kaldır" aria-label="Öne çıkar veya kaldır" style="background:transparent; border:none; padding:0; min-width:auto;">
+                                            <% if(a.is_featured) { %>
+                                                <i class="fas fa-star" style="color:#f59e0b;" title="Öne Çıkan"></i>
+                                            <% } else { %>
+                                                <i class="far fa-star" style="color:var(--border-color);" title="Normal"></i>
+                                            <% } %>
+                                        </button>
+                                    </form>
+                                </td>
+                                <td style="font-weight:600;"><%= a.name %></td>
+                                <td><%= a.category %></td>
+                                <td><%= a.price %> TL</td>
+                                <td><span class="badge-status <%= a.stock_status === 'Stokta' ? 'badge-approved' : (a.stock_status === 'Azalıyor' ? 'badge-pending' : 'badge-out') %>"><%= a.stock_status %></span></td>
+                                <td>
+                                    <button
+                                        class="btn btn-edit"
+                                        data-id="<%= a.id %>"
+                                        data-name="<%= encodeURIComponent(a.name) %>"
+                                        data-category="<%= encodeURIComponent(a.category) %>"
+                                        data-price="<%= a.price %>"
+                                        data-stock="<%= encodeURIComponent(a.stock_status) %>"
+                                        data-icon="<%= encodeURIComponent(a.icon) %>"
+                                        data-featured="<%= !!a.is_featured %>"
+                                        onclick="openEditModalFromBtn(this)"
+                                    ><i class="fas fa-edit"></i></button>
+                                    <form action="/admin/aksesuarlar/<%= a.id %>/sil" method="POST" style="display:inline;" data-confirm data-confirm-title="Aksesuar silinsin mi?" data-confirm-message="Bu aksesuarı silerseniz geri almak zor olabilir. Devam etmek istiyor musunuz?" data-confirm-approve="Evet, sil">
+                                    <button class="btn btn-delete" aria-label="Aksesuarı sil"><i class="fas fa-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+            <div style="margin-top:12px; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+                <div style="font-size:13px; color:var(--text-gray);">
+                    Toplam <strong><%= pagination ? pagination.total : aksesuarlar.length %></strong> kayıt
+                </div>
+                <% if (pagination && pagination.totalPages > 1) { %>
+                    <div style="display:flex; gap:8px;">
+                        <% if (pagination.page > 1) { %>
+                            <a class="btn" href="/admin/aksesuarlar?page=<%= pagination.page - 1 %>&search=<%= encodeURIComponent(filters && filters.search ? filters.search : '') %>&sort=<%= encodeURIComponent(filters && filters.sort ? filters.sort : 'newest') %>">Önceki</a>
+                        <% } %>
+                        <span style="align-self:center; font-size:13px; color:var(--text-gray);"><%= pagination.page %> / <%= pagination.totalPages %></span>
+                        <% if (pagination.page < pagination.totalPages) { %>
+                            <a class="btn" href="/admin/aksesuarlar?page=<%= pagination.page + 1 %>&search=<%= encodeURIComponent(filters && filters.search ? filters.search : '') %>&sort=<%= encodeURIComponent(filters && filters.sort ? filters.sort : 'newest') %>">Sonraki</a>
+                        <% } %>
+                    </div>
+                <% } %>
+            </div>
             <% } %>
 
             <!-- Ekleme Modalı -->
@@ -103,8 +147,31 @@
                             <input type="number" name="price" step="0.01" min="0" placeholder="Örn: 500" required>
                         </div>
                         <div class="form-group">
-                            <label>FontAwesome İkonu (örn: fas fa-plug)</label>
-                            <input type="text" name="icon" value="fas fa-plug">
+                            <label>Stok Durumu</label>
+                            <select name="stock_status">
+                                <option value="Stokta">Stokta</option>
+                                <option value="Azalıyor">Azalıyor</option>
+                                <option value="Tükendi">Tükendi</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>İkon Seçimi</label>
+                            <select id="add_icon_select" onchange="handleIconSelection('add')">
+                                <option value="fas fa-plug" selected>Şarj / Kablo</option>
+                                <option value="fas fa-headphones">Kulaklık</option>
+                                <option value="fas fa-bolt">Güç / Adaptör</option>
+                                <option value="fas fa-shield-halved">Koruma / Kılıf</option>
+                                <option value="fas fa-mobile-screen">Telefon</option>
+                                <option value="fas fa-battery-full">Batarya / Powerbank</option>
+                                <option value="fas fa-car">Araç İçi</option>
+                                <option value="other">Diğer (özel ikon sınıfı)</option>
+                            </select>
+                            <input type="text" name="icon_custom" id="add_icon_custom" placeholder="Örn: fas fa-plug" style="display:none; margin-top:8px;">
+                            <input type="hidden" name="icon" id="add_icon_hidden" value="fas fa-plug">
+                            <div style="margin-top:8px; font-size:13px; color:var(--text-gray); display:flex; align-items:center; gap:8px;">
+                                <span>Önizleme:</span>
+                                <i id="add_icon_preview" class="fas fa-plug" style="font-size:18px; color:var(--primary);"></i>
+                            </div>
                         </div>
                         <div class="form-group" style="display:flex; align-items:center; gap:10px;">
                             <input type="checkbox" name="is_featured" id="add_is_featured" style="width:auto; transform:scale(1.2);">
@@ -136,8 +203,31 @@
                             <input type="text" name="price" id="edit_price" required>
                         </div>
                         <div class="form-group">
-                            <label>FontAwesome İkonu</label>
-                            <input type="text" name="icon" id="edit_icon">
+                            <label>Stok Durumu</label>
+                            <select name="stock_status" id="edit_stock_status">
+                                <option value="Stokta">Stokta</option>
+                                <option value="Azalıyor">Azalıyor</option>
+                                <option value="Tükendi">Tükendi</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>İkon Seçimi</label>
+                            <select id="edit_icon_select" onchange="handleIconSelection('edit')">
+                                <option value="fas fa-plug">Şarj / Kablo</option>
+                                <option value="fas fa-headphones">Kulaklık</option>
+                                <option value="fas fa-bolt">Güç / Adaptör</option>
+                                <option value="fas fa-shield-halved">Koruma / Kılıf</option>
+                                <option value="fas fa-mobile-screen">Telefon</option>
+                                <option value="fas fa-battery-full">Batarya / Powerbank</option>
+                                <option value="fas fa-car">Araç İçi</option>
+                                <option value="other">Diğer (özel ikon sınıfı)</option>
+                            </select>
+                            <input type="text" id="edit_icon_custom" placeholder="Örn: fas fa-plug" style="display:none; margin-top:8px;">
+                            <input type="hidden" name="icon" id="edit_icon_hidden">
+                            <div style="margin-top:8px; font-size:13px; color:var(--text-gray); display:flex; align-items:center; gap:8px;">
+                                <span>Önizleme:</span>
+                                <i id="edit_icon_preview" class="fas fa-plug" style="font-size:18px; color:var(--primary);"></i>
+                            </div>
                         </div>
                         <div class="form-group" style="display:flex; align-items:center; gap:10px;">
                             <input type="checkbox" name="is_featured" id="edit_is_featured" style="width:auto; transform:scale(1.2);">
@@ -154,38 +244,101 @@
         function openModal(id) { document.getElementById(id).style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-        function openEditModal(id, name, cat, price, icon, isFeatured) {
+        function openEditModal(id, name, cat, price, stockStatus, icon, isFeatured) {
             document.getElementById('editForm').action = '/admin/aksesuarlar/' + id + '/duzenle';
             document.getElementById('edit_name').value = name;
             document.getElementById('edit_category').value = cat;
             document.getElementById('edit_price').value = price;
-            document.getElementById('edit_icon').value = icon;
+            document.getElementById('edit_stock_status').value = stockStatus || 'Stokta';
+            const knownIcons = [
+                'fas fa-plug', 'fas fa-headphones', 'fas fa-bolt', 'fas fa-shield-halved',
+                'fas fa-mobile-screen', 'fas fa-battery-full', 'fas fa-car'
+            ];
+            const editSelect = document.getElementById('edit_icon_select');
+            const editCustom = document.getElementById('edit_icon_custom');
+            if (knownIcons.includes(icon)) {
+                editSelect.value = icon;
+                editCustom.value = '';
+            } else {
+                editSelect.value = 'other';
+                editCustom.value = icon || '';
+            }
+            handleIconSelection('edit');
             document.getElementById('edit_is_featured').checked = isFeatured === true || isFeatured === 'true';
             openModal('editModal');
         }
 
-        function filterTable(query) {
-            const rows = document.querySelectorAll('#aksTable tr');
-            const q = query.toLowerCase();
-            rows.forEach(row => { row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none'; });
+        function openEditModalFromBtn(btn) {
+            const read = (k) => decodeURIComponent(btn.getAttribute(`data-${k}`) || '');
+            openEditModal(
+                btn.getAttribute('data-id'),
+                read('name'),
+                read('category'),
+                btn.getAttribute('data-price'),
+                read('stock'),
+                read('icon'),
+                btn.getAttribute('data-featured') === 'true'
+            );
         }
+
+        function handleIconSelection(prefix) {
+            const selectEl = document.getElementById(prefix + '_icon_select');
+            const customEl = document.getElementById(prefix + '_icon_custom');
+            const hiddenEl = document.getElementById(prefix + '_icon_hidden');
+            const previewEl = document.getElementById(prefix + '_icon_preview');
+
+            if (!selectEl || !customEl || !hiddenEl || !previewEl) return;
+
+            const useCustom = selectEl.value === 'other';
+            customEl.style.display = useCustom ? 'block' : 'none';
+
+            const finalIcon = useCustom ? (customEl.value.trim() || 'fas fa-plug') : selectEl.value;
+            hiddenEl.value = finalIcon;
+            previewEl.className = finalIcon;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const addCustom = document.getElementById('add_icon_custom');
+            const editCustom = document.getElementById('edit_icon_custom');
+            if (addCustom) addCustom.addEventListener('input', () => handleIconSelection('add'));
+            if (editCustom) editCustom.addEventListener('input', () => handleIconSelection('edit'));
+            handleIconSelection('add');
+            handleIconSelection('edit');
+        });
 
         // CSV Export Data
         function exportToCSV() {
             const table = document.getElementById('aksesuarDataTable');
             let csv = [];
             const rows = table.querySelectorAll('tr');
+            const escapeCell = (v) => {
+                const s = String(v ?? '')
+                    .replace(/(\r\n|\n|\r)/gm, ' ')
+                    .trim()
+                    .replace(/"/g, '""');
+                return `"${s}"`;
+            };
             
             for (let i = 0; i < rows.length; i++) {
                 let row = [], cols = rows[i].querySelectorAll('td, th');
                 for (let j = 1; j < cols.length - 1; j++) {
-                    let text = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, '').trim();
-                    row.push('"' + text + '"');
+                    // İkon sütunu (index: 2) CSV'ye girmez (header + data)
+                    if (j === 2) continue;
+                    let cell = cols[j];
+                    let text = '';
+                    // Öne Çıkan sütunu CSV'de + olarak yazılsın
+                    if (i !== 0 && j === 3) {
+                        text = cell.querySelector('.fas.fa-star') ? '+' : '';
+                    } else {
+                        text = (cell.textContent || '');
+                    }
+                    text = text.replace(/\s*TL$/i, '').trim();
+                    row.push(escapeCell(text));
                 }
-                if(row.length > 0) csv.push(row.join(','));
+                if(row.length > 0) csv.push(row.join(';'));
             }
 
-            const csvFile = new Blob(["\uFEFF"+csv.join('\n')], {type: "text/csv;charset=utf-8;"});
+            const csvFile = new Blob(["\uFEFF"+csv.join('\r\n')], {type: "text/csv;charset=utf-8;"});
             const downloadLink = document.createElement("a");
             downloadLink.download = "aksesuarlar_raporu.csv";
             downloadLink.href = window.URL.createObjectURL(csvFile);
@@ -202,6 +355,12 @@
         }
 
         window.onclick = function(event) { if (event.target.classList.contains('modal')) event.target.style.display = 'none'; }
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal('addModal');
+                closeModal('editModal');
+            }
+        });
     </script>
 </body>
 </html>

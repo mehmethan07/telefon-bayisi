@@ -25,10 +25,19 @@
                     <button class="btn btn-add" onclick="openModal('addModal')" style="margin:0;"><i class="fas fa-plus"></i> Yeni Ürün Ekle</button>
                     <button class="btn" style="background:var(--card-bg); color:var(--text-main); border:1px solid var(--border-color); font-weight:600; cursor:pointer; padding:10px 16px; border-radius:8px;" onclick="exportToCSV()"><i class="fas fa-download"></i> CSV İndir</button>
                 </div>
-                <!-- #5 Admin Search -->
-                <div class="admin-search" style="margin:0;">
-                    <input type="text" id="tableSearch" placeholder="Tabloda ara..." oninput="filterTable(this.value)">
-                </div>
+                <form class="admin-search" style="margin:0;" method="GET" action="/admin/urunler">
+                    <input type="text" id="tableSearch" name="search" placeholder="Ürün veya marka ara..." value="<%= (filters && filters.search) ? filters.search : '' %>">
+                    <select name="sort" style="padding:10px; border:1.5px solid #e2e8f0; border-radius:8px; font-family:inherit;">
+                        <option value="newest" <%= (filters && filters.sort === 'newest') ? 'selected' : '' %>>En Yeni</option>
+                        <option value="oldest" <%= (filters && filters.sort === 'oldest') ? 'selected' : '' %>>En Eski</option>
+                        <option value="name_asc" <%= (filters && filters.sort === 'name_asc') ? 'selected' : '' %>>İsim (A-Z)</option>
+                        <option value="name_desc" <%= (filters && filters.sort === 'name_desc') ? 'selected' : '' %>>İsim (Z-A)</option>
+                        <option value="price_asc" <%= (filters && filters.sort === 'price_asc') ? 'selected' : '' %>>Fiyat (Artan)</option>
+                        <option value="price_desc" <%= (filters && filters.sort === 'price_desc') ? 'selected' : '' %>>Fiyat (Azalan)</option>
+                        <option value="featured" <%= (filters && filters.sort === 'featured') ? 'selected' : '' %>>Öne Çıkan Üstte</option>
+                    </select>
+                    <button class="btn btn-add" type="submit" style="margin:0;"><i class="fas fa-filter"></i> Uygula</button>
+                </form>
             </div>
 
             <% if (products.length === 0) { %>
@@ -39,47 +48,69 @@
                     <p>İlk ürününüzü eklemek için yukarıdaki butonu kullanın.</p>
                 </div>
             <% } else { %>
-            <table id="productsDataTable">
-                <thead>
-                    <tr>
-                        <th style="width:40px;"><input type="checkbox" id="selectAll" onclick="toggleAllCheckboxes(this)"></th>
-                        <th>ID</th>
-                        <th>Görsel</th>
-                        <th>Öne Çıkan</th>
-                        <th>Ürün Adı</th>
-                        <th>Marka</th>
-                        <th>Fiyat</th>
-                        <th>Stok</th>
-                        <th>İşlemler</th>
-                    </tr>
-                </thead>
-                <tbody id="productTable">
-                    <% products.map((p,idx) => { %>
+            <div class="table-wrap">
+                <table id="productsDataTable">
+                    <thead>
                         <tr>
-                            <td><input type="checkbox" class="rowCheckbox" value="<%= p.id %>"></td>
-                            <td><%= p.id %></td>
-                            <td><img src="<%= p.image_url %>" alt="<%= p.name %>" style="width:40px; height:40px; object-fit:contain; border-radius:6px;"></td>
-                            <td style="text-align:center;">
-                                <% if(p.is_featured) { %>
-                                    <i class="fas fa-star" style="color:#f59e0b;" title="Öne Çıkan"></i>
-                                <% } else { %>
-                                    <i class="far fa-star" style="color:var(--border-color);" title="Normal"></i>
-                                <% } %>
-                            </td>
-                            <td style="font-weight:600;"><%= p.name %></td>
-                            <td><%= p.brand %></td>
-                            <td><%= p.price %> TL</td>
-                            <td><span class="badge-status <%= p.stock_status === 'Stokta' ? 'badge-approved' : (p.stock_status === 'Azalıyor' ? 'badge-pending' : 'badge-danger') %>" style="<%= p.stock_status === 'Tükendi' ? 'background:#fee2e2; color:#ef4444;' : '' %>"><%= p.stock_status %></span></td>
-                            <td>
-                                <button class="btn btn-edit" onclick="openEditModal('<%= p.id %>', '<%= p.name %>', '<%= p.brand %>', '<%= p.price %>', '<%= p.stock_status %>', '<%= p.image_url %>', <%= !!p.is_featured %>)"><i class="fas fa-edit"></i></button>
-                                <form action="/admin/urunler/<%= p.id %>/sil" method="POST" style="display:inline;" data-confirm data-confirm-title="Ürün silinsin mi?" data-confirm-message="Bu ürünü silerseniz geri almak zor olabilir. Devam etmek istiyor musunuz?" data-confirm-approve="Evet, sil">
-                                    <button class="btn btn-delete"><i class="fas fa-trash"></i></button>
-                                </form>
-                            </td>
+                            <th style="width:40px;"><input type="checkbox" id="selectAll" onclick="toggleAllCheckboxes(this)"></th>
+                            <th>ID</th>
+                            <th>Görsel</th>
+                            <th>Öne Çıkan</th>
+                            <th>Ürün Adı</th>
+                            <th>Marka</th>
+                            <th>Fiyat</th>
+                            <th>Stok</th>
+                            <th>İşlemler</th>
                         </tr>
-                    <% }) %>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody id="productTable">
+                        <% products.map((p,idx) => { %>
+                            <tr>
+                                <td><input type="checkbox" class="rowCheckbox" value="<%= p.id %>"></td>
+                                <td><%= p.id %></td>
+                                <td><img src="<%= p.image_url %>" alt="<%= p.name %>" style="width:40px; height:40px; object-fit:contain; border-radius:6px;"></td>
+                                <td style="text-align:center;">
+                                    <form action="/admin/urunler/<%= p.id %>/one-cikar" method="POST" style="display:inline;">
+                                        <button class="btn" type="submit" title="Öne çıkar / kaldır" aria-label="Öne çıkar veya kaldır" style="background:transparent; border:none; padding:0; min-width:auto;">
+                                            <% if(p.is_featured) { %>
+                                                <i class="fas fa-star" style="color:#f59e0b;" title="Öne Çıkan"></i>
+                                            <% } else { %>
+                                                <i class="far fa-star" style="color:var(--border-color);" title="Normal"></i>
+                                            <% } %>
+                                        </button>
+                                    </form>
+                                </td>
+                                <td style="font-weight:600;"><%= p.name %></td>
+                                <td><%= p.brand %></td>
+                                <td><%= p.price %> TL</td>
+                                <td><span class="badge-status <%= p.stock_status === 'Stokta' ? 'badge-approved' : (p.stock_status === 'Azalıyor' ? 'badge-pending' : 'badge-out') %>"><%= p.stock_status %></span></td>
+                                <td>
+                                    <button class="btn btn-edit" onclick="openEditModal('<%= p.id %>', '<%= p.name %>', '<%= p.brand %>', '<%= p.price %>', '<%= p.stock_status %>', '<%= p.image_url %>', <%= !!p.is_featured %>)"><i class="fas fa-edit"></i></button>
+                                    <form action="/admin/urunler/<%= p.id %>/sil" method="POST" style="display:inline;" data-confirm data-confirm-title="Ürün silinsin mi?" data-confirm-message="Bu ürünü silerseniz geri almak zor olabilir. Devam etmek istiyor musunuz?" data-confirm-approve="Evet, sil">
+                                    <button class="btn btn-delete" aria-label="Ürünü sil"><i class="fas fa-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+            <div style="margin-top:12px; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+                <div style="font-size:13px; color:var(--text-gray);">
+                    Toplam <strong><%= pagination ? pagination.total : products.length %></strong> kayıt
+                </div>
+                <% if (pagination && pagination.totalPages > 1) { %>
+                    <div style="display:flex; gap:8px;">
+                        <% if (pagination.page > 1) { %>
+                            <a class="btn" href="/admin/urunler?page=<%= pagination.page - 1 %>&search=<%= encodeURIComponent(filters && filters.search ? filters.search : '') %>&sort=<%= encodeURIComponent(filters && filters.sort ? filters.sort : 'newest') %>">Önceki</a>
+                        <% } %>
+                        <span style="align-self:center; font-size:13px; color:var(--text-gray);"><%= pagination.page %> / <%= pagination.totalPages %></span>
+                        <% if (pagination.page < pagination.totalPages) { %>
+                            <a class="btn" href="/admin/urunler?page=<%= pagination.page + 1 %>&search=<%= encodeURIComponent(filters && filters.search ? filters.search : '') %>&sort=<%= encodeURIComponent(filters && filters.sort ? filters.sort : 'newest') %>">Sonraki</a>
+                        <% } %>
+                    </div>
+                <% } %>
+            </div>
             <% } %>
 
             <!-- Ekleme Modalı -->
@@ -206,19 +237,41 @@
             let csv = [];
             // Sadece görünen satırları ve başlıkları alalım
             const rows = table.querySelectorAll('tr');
+            const escapeCell = (v) => {
+                const s = String(v ?? '')
+                    .replace(/(\r\n|\n|\r)/gm, ' ')
+                    .trim()
+                    .replace(/"/g, '""');
+                return `"${s}"`;
+            };
             
             for (let i = 0; i < rows.length; i++) {
                 let row = [], cols = rows[i].querySelectorAll('td, th');
                 // İlk sütun checkbox, son sütun işlemler. Bunları atlayalım. (index 1 to length-2)
                 for (let j = 1; j < cols.length - 1; j++) {
+                    if (i === 0) {
+                        const headerText = (cols[j].textContent || '').trim().toLowerCase();
+                        if (headerText === 'görsel') continue;
+                    } else {
+                        // Görsel sütunu (td index: 2) CSV'ye girmez
+                        if (j === 2) continue;
+                    }
                     // Sadece metni al, görselleri/butonları yoksay
-                    let text = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, '').trim();
-                    row.push('"' + text + '"');
+                    let cell = cols[j];
+                    let text = '';
+                    // Öne Çıkan sütunu CSV'de + olarak yazılsın
+                    if (i !== 0 && j === 3) {
+                        text = cell.querySelector('.fas.fa-star') ? '+' : '';
+                    } else {
+                        text = (cell.textContent || '');
+                    }
+                    text = text.replace(/\s*TL$/i, '').trim();
+                    row.push(escapeCell(text));
                 }
-                if(row.length > 0) csv.push(row.join(','));
+                if(row.length > 0) csv.push(row.join(';'));
             }
 
-            const csvFile = new Blob(["\uFEFF"+csv.join('\n')], {type: "text/csv;charset=utf-8;"});
+            const csvFile = new Blob(["\uFEFF"+csv.join('\r\n')], {type: "text/csv;charset=utf-8;"});
             const downloadLink = document.createElement("a");
             downloadLink.download = "urunler_raporu.csv";
             downloadLink.href = window.URL.createObjectURL(csvFile);
@@ -239,6 +292,12 @@
         window.onclick = function(event) {
             if (event.target.classList.contains('modal')) event.target.style.display = 'none';
         }
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal('addModal');
+                closeModal('editModal');
+            }
+        });
     </script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Siparişler & Ayırtmalar | <%= firma_adi %> Yönetim</title>
+    <title>Siparişler | <%= firma_adi %> Yönetim</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link rel="stylesheet" href="/css/admin.css">
@@ -13,13 +13,13 @@
         <%- include('partials/sidebar', { activePage: 'siparisler' }) %>
 
         <div class="admin-main">
-            <%- include('partials/topbar', { pageTitle: 'Sipariş / Ayırtmalar', pageIcon: 'fas fa-store', badgeCount: reservations.length }) %>
+            <%- include('partials/topbar', { pageTitle: 'Siparişler', pageIcon: 'fas fa-store', badgeCount: reservations.length }) %>
 
             <% if (reservations.length === 0) { %>
                 <div class="empty-state">
                     <i class="fas fa-box-open"></i>
-                    <h3>Henüz ayırtılmış ürün yok</h3>
-                    <p>Müşteriler mağazadan teslim al seçeneğini kullandığında talepler burada görünür.</p>
+                    <h3>Henüz sipariş yok</h3>
+                    <p>Müşteri siparişleri burada listelenecek.</p>
                 </div>
             <% } else { %>
                 <div class="res-list">

@@ -42,6 +42,11 @@
 </section>
 
 <section class="cart-section">
+    <% if (typeof cart_notice !== 'undefined' && cart_notice) { %>
+        <div style="margin-bottom:14px; background:#fff7ed; color:#9a3412; border:1px solid #fed7aa; border-radius:10px; padding:12px 14px;">
+            <i class="fas fa-circle-info"></i> <%= cart_notice %>
+        </div>
+    <% } %>
     <% if (sepet.length === 0) { %>
         <div class="empty-cart">
             <i class="fas fa-shopping-basket"></i>
@@ -76,9 +81,11 @@
                         <span class="qty-value"><%= s.miktar %></span>
                         <form action="/sepet/artir/<%= s.type %>/<%= s.item.id %>" method="POST" style="margin:0;"><button type="submit" class="qty-btn">+</button></form>
                     </div>
-                    <a href="/sepet/sil/<%= s.type %>/<%= s.item.id %>" class="btn-remove" style="display:flex; align-items:center; justify-content:center; text-decoration:none;" title="Kaldır" data-confirm data-confirm-title="Ürün kaldırılsın mı?" data-confirm-message="Bu ürünü sepetten kaldırmak istediğinize emin misiniz?" data-confirm-approve="Evet, kaldır">
-                        <i class="fas fa-trash"></i>
-                    </a>
+                    <form action="/sepet/sil/<%= s.type %>/<%= s.item.id %>" method="POST" style="margin:0;" data-confirm data-confirm-title="Ürün kaldırılsın mı?" data-confirm-message="Bu ürünü sepetten kaldırmak istediğinize emin misiniz?" data-confirm-approve="Evet, kaldır">
+                        <button type="submit" class="btn-remove" style="display:flex; align-items:center; justify-content:center; text-decoration:none;" title="Kaldır">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
                 </div>
             <% }) %>
         </div>
