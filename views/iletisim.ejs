@@ -15,7 +15,7 @@
             <div class="info-icon"><i class="fas fa-location-dot"></i></div>
             <div class="info-details">
                 <h4>Adres</h4>
-                <p>Örnek Mahallesi, Teknoloji Caddesi No: 42<br>İstanbul, Türkiye</p>
+                <p><%- settings && settings.address ? settings.address.replace(/\n/g, '<br>') : "Örnek Mahallesi, Teknoloji Caddesi No: 42<br>İstanbul, Türkiye" %></p>
             </div>
         </div>
 
@@ -23,7 +23,7 @@
             <div class="info-icon"><i class="fas fa-phone"></i></div>
             <div class="info-details">
                 <h4>Telefon</h4>
-                <p>+90 (555) 123 45 67</p>
+                <p>+<%= settings && settings.whatsapp ? settings.whatsapp.replace(/(\d{2})(\d{3})(\d{3})(\d{4})/, "$1 $2 $3 $4") : "90 555 123 4567" %></p>
             </div>
         </div>
 
@@ -31,7 +31,7 @@
             <div class="info-icon"><i class="fas fa-envelope"></i></div>
             <div class="info-details">
                 <h4>E-posta</h4>
-                <p>info@bayim.com</p>
+                <p><%= settings && settings.email ? settings.email : "info@bayim.com" %></p>
             </div>
         </div>
 

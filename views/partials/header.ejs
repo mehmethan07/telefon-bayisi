@@ -6,7 +6,7 @@
     <title><%= firma_adi %></title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 
     <link rel="stylesheet" href="/css/base.css">
     <link rel="stylesheet" href="/css/header.css">
@@ -55,17 +55,21 @@
 
             <a href="/servis" class="nav-link <%= currentPath.startsWith('/servis') ? 'active' : '' %>">Servis</a>
             <a href="/siparis/sorgula" class="nav-link <%= currentPath.startsWith('/siparis/sorgula') ? 'active' : '' %>">Sipariş Takip</a>
-            <a href="/iletisim" class="nav-contact-btn <%= currentPath === '/iletisim' ? 'active' : '' %>">İletişim</a>
         </nav>
 
+
         <!-- Right Actions Grouping (Point 1) -->
-        <div class="header-right-actions">
+        <style>
+            @media (max-width: 768px) { .header-contact-desktop { display: none !important; } }
+        </style>
+        <div class="header-right-actions" style="display: flex; align-items: center; gap: 15px;">
             <a href="/sepet" class="cart-btn" id="headerCartBtn">
                 <i class="fas fa-shopping-cart"></i>
                 <% if (sepet_sayisi > 0) { %>
                     <span class="cart-badge" id="cartBadge"><%= sepet_sayisi %></span>
                 <% } %>
             </a>
+            <a href="/iletisim" class="header-btn <%= currentPath === '/iletisim' ? 'active' : '' %>">İletişim</a>
             <button class="menu-toggle" id="menuToggleBtn">
                 <i class="fas fa-bars"></i>
             </button>

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teknik Servis | <%= firma_adi %> Yönetim</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <link rel="stylesheet" href="/css/admin.css">
 </head>
 <body>
@@ -23,7 +23,7 @@
                 </div>
             <% } else { %>
                 <div class="res-list">
-                    <% requests.slice().reverse().forEach(r => { %>
+                    <% requests.forEach(r => { %>
                         <div class="res-card">
                             <div class="res-info">
                                 <h3 style="margin-bottom:10px;"><i class="fas fa-wrench"></i> <%= r.device_model %></h3>
@@ -40,19 +40,23 @@
 
                                 <div class="res-actions" style="margin-top:0; min-width: 170px; display:flex; flex-direction:column; justify-content:center; align-items:flex-end;">
                                 <form action="/admin/servis/<%= r.id %>/durum" method="POST">
-                                    <select
-                                        name="status"
+                                        <%
+                                        let bg = r.status === 'Beklemede' ? '#fffbeb' : (r.status === 'Onaylandı' ? '#f0fdfa' : (r.status === 'Onarımda' ? '#eff6ff' : (r.status === 'Parça Bekleniyor' ? '#f3f4f6' : (r.status === 'Tamamlandı' ? '#f0fdf4' : '#fef2f2'))));
+                                        let col = r.status === 'Beklemede' ? '#d97706' : (r.status === 'Onaylandı' ? '#0f766e' : (r.status === 'Onarımda' ? '#1d4ed8' : (r.status === 'Parça Bekleniyor' ? '#111827' : (r.status === 'Tamamlandı' ? '#16a34a' : '#dc2626'))));
+                                        let brd = r.status === 'Beklemede' ? '#fde68a' : (r.status === 'Onaylandı' ? '#ccfbf1' : (r.status === 'Onarımda' ? '#bfdbfe' : (r.status === 'Parça Bekleniyor' ? '#e5e7eb' : (r.status === 'Tamamlandı' ? '#bbf7d0' : '#fecaca'))));
+                                        let curs = (r.status === 'Tamamlandı' || r.status === 'İptal') ? 'cursor:not-allowed; opacity:0.8;' : 'cursor:pointer;';
+                                        %>
+                                        <select name="status"
                                         data-current="<%= r.status %>"
                                         onchange="confirmServiceStatusChange(this)"
-                                        style="padding:10px; border-radius:8px; font-weight:600; font-size:14px;
-                                               background: <%= r.status === 'Beklemede' ? '#fffbeb' : (r.status === 'Onarımda' ? '#eff6ff' : (r.status === 'Parça Bekleniyor' ? '#f3f4f6' : (r.status === 'Tamamlandı' ? '#f0fdf4' : '#fef2f2'))) %>;
-                                               color: <%= r.status === 'Beklemede' ? '#d97706' : (r.status === 'Onarımda' ? '#1d4ed8' : (r.status === 'Parça Bekleniyor' ? '#111827' : (r.status === 'Tamamlandı' ? '#16a34a' : '#dc2626'))) %>;
-                                               border: 1px solid <%= r.status === 'Beklemede' ? '#fde68a' : (r.status === 'Onarımda' ? '#bfdbfe' : (r.status === 'Parça Bekleniyor' ? '#e5e7eb' : (r.status === 'Tamamlandı' ? '#bbf7d0' : '#fecaca'))) %>;
-                                               <%= (r.status === 'Tamamlandı' || r.status === 'İptal') ? 'cursor:not-allowed; opacity:0.8;' : 'cursor:pointer;' %>"
-                                        <%= (r.status === 'Tamamlandı' || r.status === 'İptal') ? 'disabled' : '' %>
-                                    >
+                                        <%- `style="padding:10px; border-radius:8px; font-weight:600; font-size:14px; background: ${bg}; color: ${col}; border: 1px solid ${brd}; ${curs}"` %>
+                                        <%= (r.status === 'Tamamlandı' || r.status === 'İptal') ? 'disabled' : '' %>>
                                         <% if (r.status === 'Beklemede') { %>
                                             <option value="Beklemede" selected>Beklemede</option>
+                                            <option value="Onaylandı">Onaylandı</option>
+                                            <option value="İptal">İptal</option>
+                                        <% } else if (r.status === 'Onaylandı') { %>
+                                            <option value="Onaylandı" selected>Onaylandı</option>
                                             <option value="Onarımda">Onarımda</option>
                                             <option value="İptal">İptal</option>
                                         <% } else if (r.status === 'Onarımda') { %>

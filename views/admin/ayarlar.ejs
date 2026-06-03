@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Ayarları | <%= firma_adi %> Yönetim</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <link rel="stylesheet" href="/css/admin.css">
     <style>
         .settings-container { max-width: 900px; margin: 0 auto; padding: 20px 0; }
@@ -66,7 +66,19 @@
                             <div class="form-group">
                                 <label for="whatsapp">WhatsApp Numarası</label>
                                 <input type="text" id="whatsapp" name="whatsapp" value="<%= settings.whatsapp %>" placeholder="Örn: 905551234567">
-                                <span class="form-hint">Müşterilerin size ulaşacağı numara (Başında + veya 0 olmadan, ülke koduyla).</span>
+                                <span class="form-hint">Müşterilerin size ulaşacağı numara.</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">E-Posta Adresi</label>
+                                <input type="text" id="email" name="email" value="<%= settings.email || 'info@bayim.com' %>" placeholder="Örn: info@bayim.com">
+                                <span class="form-hint">İletişim sayfasında ve alt bilgide (footer) görünür.</span>
+                            </div>
+                        </div>
+                        <div class="form-row" style="grid-template-columns: 1fr;">
+                            <div class="form-group">
+                                <label for="address">Mağaza Adresi</label>
+                                <input type="text" id="address" name="address" value="<%= settings.address || 'Örnek Mah. Teknoloji Cad. No:42 İstanbul, Türkiye' %>" placeholder="Mağaza açık adresi">
+                                <span class="form-hint">İletişim sayfasında ve alt bilgide (footer) görünür.</span>
                             </div>
                         </div>
                         <div class="toggle-group" style="margin-top: 10px;">
@@ -136,6 +148,26 @@
                                     <label for="youtube" style="display:block; font-weight:600; margin-bottom:5px; font-size:14px;"><i class="fab fa-youtube" style="color:#ff0000;"></i> YouTube</label>
                                     <input type="text" id="youtube" name="youtube" value="<%= settings.youtube %>" placeholder="https://youtube.com/@bayim" style="width:100%; padding:10px 15px; border:1px solid var(--border-color); border-radius:8px;">
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ürün Detayları (Genel Metinler) -->
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <i class="fas fa-file-alt"></i>
+                            <h2>Ürün Sayfası (Genel Metinler)</h2>
+                        </div>
+                        <p style="font-size:14px; color:var(--text-gray); margin-bottom:20px; margin-top:-10px;">Tüm ürün detay sayfalarında ortak olarak gösterilecek metinleri (Taksit Seçenekleri, İade Politikası) buradan düzenleyebilirsiniz.</p>
+                        
+                        <div class="form-row" style="grid-template-columns: 1fr;">
+                            <div class="form-group">
+                                <label for="paymentText">Taksit Seçenekleri Metni</label>
+                                <textarea id="paymentText" name="paymentText" rows="3" style="width:100%; padding:10px 15px; border:1px solid var(--border-color); border-radius:8px; font-family:inherit;"><%= settings.paymentText || 'Tüm kredi kartlarına peşin fiyatına 3, 6 veya 9 taksit imkanı sunulmaktadır. Havale/EFT ile yapılan ödemelerde ekstra %5 indirim sepetinizde otomatik olarak uygulanır.' %></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="returnPolicyText">Kolay İade (Garanti & İade) Metni</label>
+                                <textarea id="returnPolicyText" name="returnPolicyText" rows="3" style="width:100%; padding:10px 15px; border:1px solid var(--border-color); border-radius:8px; font-family:inherit;"><%= settings.returnPolicyText || '14 gün içinde koşulsuz şartsız iade hakkınız bulunmaktadır. Ürünün orijinal kutusunun hasar görmemiş olması gerekmektedir.' %></textarea>
                             </div>
                         </div>
                     </div>

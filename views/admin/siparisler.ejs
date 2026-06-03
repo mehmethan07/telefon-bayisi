@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Siparişler | <%= firma_adi %> Yönetim</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <link rel="stylesheet" href="/css/admin.css">
 </head>
 <body>
@@ -23,7 +23,7 @@
                 </div>
             <% } else { %>
                 <div class="res-list">
-                    <% reservations.slice().reverse().forEach(res => { %>
+                    <% reservations.forEach(res => { %>
                         <div class="res-card">
                             <div class="res-info">
                                 <h3 style="margin-bottom:10px;"><i class="fas fa-shopping-bag"></i> Sipariş #<%= String(res.id).slice(-6) %> - <%= res.items.length %> Ürün</h3>
@@ -43,7 +43,13 @@
                             
                             <div class="res-actions" style="margin-top:0; min-width: 150px; display:flex; flex-direction:column; justify-content:center; align-items:flex-end;">
                                 <form action="/admin/siparisler/<%= res.id %>/durum" method="POST">
-                                    <select name="status" data-current="<%= res.status %>" onchange="confirmStatusChange(this)" style="padding:10px; border-radius:8px; font-weight:600; font-size:14px; background: <%= res.status === 'Beklemede' ? '#fffbeb' : (res.status === 'Onaylandı' ? '#f0fdf4' : (res.status === 'Teslime Hazır' ? '#ecfdf5' : (res.status === 'Teslim Edildi' ? '#eff6ff' : '#fef2f2'))) %>; color: <%= res.status === 'Beklemede' ? '#d97706' : (res.status === 'Onaylandı' ? '#16a34a' : (res.status === 'Teslime Hazır' ? '#047857' : (res.status === 'Teslim Edildi' ? '#1d4ed8' : '#dc2626'))) %>; border: 1px solid <%= res.status === 'Beklemede' ? '#fde68a' : (res.status === 'Onaylandı' ? '#bbf7d0' : (res.status === 'Teslime Hazır' ? '#a7f3d0' : (res.status === 'Teslim Edildi' ? '#bfdbfe' : '#fecaca'))) %>; <%= (res.status === 'Teslim Edildi' || res.status === 'İptal Edildi') ? 'cursor:not-allowed; opacity:0.8;' : 'cursor:pointer;' %>" <%= (res.status === 'Teslim Edildi' || res.status === 'İptal Edildi') ? 'disabled' : '' %>>
+                                    <%
+                                        let sBg = res.status === 'Beklemede' ? '#fffbeb' : (res.status === 'Onaylandı' ? '#f0fdf4' : (res.status === 'Teslime Hazır' ? '#ecfdf5' : (res.status === 'Teslim Edildi' ? '#eff6ff' : '#fef2f2')));
+                                        let sCol = res.status === 'Beklemede' ? '#d97706' : (res.status === 'Onaylandı' ? '#16a34a' : (res.status === 'Teslime Hazır' ? '#047857' : (res.status === 'Teslim Edildi' ? '#1d4ed8' : '#dc2626')));
+                                        let sBrd = res.status === 'Beklemede' ? '#fde68a' : (res.status === 'Onaylandı' ? '#bbf7d0' : (res.status === 'Teslime Hazır' ? '#a7f3d0' : (res.status === 'Teslim Edildi' ? '#bfdbfe' : '#fecaca')));
+                                        let sCurs = (res.status === 'Teslim Edildi' || res.status === 'İptal Edildi') ? 'cursor:not-allowed; opacity:0.8;' : 'cursor:pointer;';
+                                    %>
+                                    <select name="status" data-current="<%= res.status %>" onchange="confirmStatusChange(this)" <%- `style="padding:10px; border-radius:8px; font-weight:600; font-size:14px; background: ${sBg}; color: ${sCol}; border: 1px solid ${sBrd}; ${sCurs}"` %> <%= (res.status === 'Teslim Edildi' || res.status === 'İptal Edildi') ? 'disabled' : '' %>>
                                         <% if (res.status === 'Beklemede') { %>
                                             <option value="Beklemede" selected>Beklemede</option>
                                             <option value="Onaylandı">Onaylandı</option>

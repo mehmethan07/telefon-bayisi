@@ -1,54 +1,41 @@
-# Telefon Bayisi - Satış & Teknik Servis Platformu
+# Telefon Bayisi - Satış ve Teknik Servis Otomasyonu
 
-Bu proje, bir telefon bayisinin cihaz ve aksesuar satışlarını, mağazadan ürün ayırtma süreçlerini ve teknik servis takip operasyonlarını profesyonelce yönetebileceği, modern ve duyarlı (responsive) bir web uygulamasıdır.
+## 1. Proje Özeti
+* Bu proje, bir telefon bayisinin günlük işlemlerini yönetmek için geliştirilmiş web tabanlı bir otomasyon sistemidir.
+* Müşteriler mağazadaki cihazları ve aksesuarları inceleyebilir, sepetlerine ekleyip mağazadan teslim almak üzere ayırtabilirler.
+* Müşteriler kendi takip kodları (Örn: SRV-123456) ile teknik servis süreçlerini anlık olarak sistem üzerinden sorgulayabilirler.
+* Yönetici (Admin) paneli üzerinden ürün stokları, sipariş (ayırtma) onayları, müşteri mesajları ve teknik servis durumları yönetilebilir.
+* Proje, Veritabanı Yönetim Sistemleri (VTYS) dersi kapsamında ilişkisel veritabanı kurallarına ve kısıtlamalarına uygun olarak tasarlanmıştır.
 
-## 🚀 Öne Çıkan Özellikler
+## 2. Geliştirme Ortamı
+* **Kullanılan Dil / Platform:** JavaScript, Node.js
+* **Backend Framework:** Express.js
+* **Frontend (Arayüz):** EJS (Şablon Motoru), HTML5, CSS3
+* **Veritabanı:** PostgreSQL (pg kütüphanesi kullanılarak)
+* **Temel Kütüphaneler:** `express`, `express-session`, `pg`, `bcryptjs`, `dotenv`, `ejs`
 
-* **Kargo Yerine Mağazadan Ayırtma (Click & Collect):** Kargo süreçlerinden tamamen bağımsız, mağaza odaklı "Sepete Ekle -> Mağazada Ayırt -> Elden Teslim Al" iş akışı.
-* **Gelişmiş Servis & Sipariş Takip Sistemi:** Kullanıcıların kendilerine özel `SRV-123456` (Servis) ve `SP-123456` (Sipariş) formatındaki kodlar ile anlık olarak durumlarını sorgulayabilmesi.
-* **Modern ve Duyarlı (Responsive) Tasarım:** Masaüstü, tablet ve mobil cihazlar için CSS Grid ve Flexbox ile tamamen uyarlanmış, yüksek kaliteli bir arayüz.
-* **Dinamik Yönetim Paneli (Admin):**
-  * Ürün ve Aksesuar yönetimi
-  * Sipariş (Ayırtma) ve Teknik Servis durum güncellemeleri (Sıkı durum kontrol mekanizmaları ile)
-  * Genel Site Ayarları (Aktif/Pasif ayarlanabilir, link eklenebilir sosyal medya modülleri, WhatsApp iletişim entegrasyonu)
-* **Premium Footer & Arayüz Detayları:** Hover animasyonları, kurumsal linkler ve ödeme seçenekleri rozetleriyle donatılmış dinamik alt bilgi alanı.
+## 3. Projenin Yüklenmesi ve Çalışır Hale Getirilmesi
+* Bilgisayarınızda Node.js ve PostgreSQL kurulu olmalıdır.
+* Komut İstemcisi (Terminal) üzerinden projenin bulunduğu klasöre gidin.
+* Gerekli paketleri ve bağımlılıkları indirmek için şu komutu çalıştırın:
+  `npm install`
+* Projenin ana klasöründe `.env` adında yeni bir dosya oluşturun ve içerisine kendi veritabanı ayarlarınızı şu şekilde girin:
+  ```env
+  DB_USER=postgres
+  DB_PASSWORD=veritabani_sifreniz
+  DB_HOST=localhost
+  DB_PORT=5432
+  DB_NAME=telefon_bayisi
+  SESSION_SECRET=gizli_anahtar_123
+  ```
+* Veritabanı tablolarının oluşturulması için, PostgreSQL arayüzünden (örneğin pgAdmin) `telefon_bayisi` adında bir veritabanı oluşturun ve içerisine `database.sql` dosyasındaki kodları kopyalayarak çalıştırın.
+* Projeyi başlatmak için terminale şu komutu yazın:
+  `npm run dev`
+* Tarayıcınızı açın ve adres çubuğuna `http://localhost:8080` yazarak projeyi görüntüleyin.
 
-## 🛠️ Teknolojiler
+## 4. Geliştirilen Arayüzün Örnek Görseli
 
-* **Backend:** Node.js, Express.js
-* **Frontend:** EJS (Şablon Motoru), Modern Vanilla CSS
-* **Veritabanı:** In-memory (Veritabanı entegrasyonu hazırlık aşamasında)
-* **İkonlar ve Fontlar:** FontAwesome 6, Google Fonts (Space Grotesk, Inter)
-
-## 📦 Kurulum
-
-1. Depoyu klonlayın:  
-```bash
-git clone https://github.com/mehmethan07/telefon-bayisi.git
-```
-
-2. Proje dizinine gidin:  
-```bash
-cd telefon-bayisi
-```
-
-3. Bağımlılıkları yükleyin:  
-```bash
-npm install
-```
-
-4. Uygulamayı başlatın:  
-```bash
-npm start
-```
-*Uygulama varsayılan olarak `http://localhost:8080` adresinde çalışacaktır.*
-
-## 📌 Geliştirme Notları
-
-* Proje tamamen kargo bağımlılıklarından arındırılmış, yerel mağaza müşterilerine yönelik tasarlanmıştır.
-* Mevcut sürümde tüm kayıtlar, ayarlar ve oturumlar geçici olarak bellek (in-memory) üzerinde tutulmaktadır. Üretim ortamına geçişte bir SQL/NoSQL veritabanı (örn. MongoDB, PostgreSQL) entegrasyonu yapılması hedeflenmektedir.
-* EJS ve Express.js yapısı sayesinde sayfa içi hata yönetimleri (not defined sorunlarına karşı güvenlik önlemleri) alınmıştır.
-
-## 📝 Lisans
-
-Bu proje ISC lisansı altındadır.
+![Arayüz Görseli 1](arayuzgorsel1.png)
+![Arayüz Görseli 2](arayuzgorsel2.png)
+![Arayüz Görseli 3](arayuzgorsel3.png)
+![Arayüz Görseli 4](arayuzgorsel4.png)

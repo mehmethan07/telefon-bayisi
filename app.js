@@ -26,7 +26,7 @@ app.use(session({
     }
 }));
 
-const SERVICE_STATUS_WHITELIST = ['Beklemede', 'Onarımda', 'Parça Bekleniyor', 'Tamamlandı', 'İptal'];
+const SERVICE_STATUS_WHITELIST = ['Beklemede', 'Onaylandı', 'Onarımda', 'Parça Bekleniyor', 'Tamamlandı', 'İptal'];
 const ORDER_STATUS_WHITELIST = ['Beklemede', 'Onaylandı', 'Teslime Hazır', 'Teslim Edildi', 'İptal Edildi'];
 
 let adminSettings = {
@@ -40,7 +40,11 @@ let adminSettings = {
     twitterActive: true,
     youtube: "#",
     youtubeActive: true,
-    maintenanceMode: false
+    maintenanceMode: false,
+    email: "info@bayim.com",
+    address: "Örnek Mah. Teknoloji Cad. No:42 İstanbul, Türkiye",
+    paymentText: "Tüm kredi kartlarına peşin fiyatına 3, 6 veya 9 taksit imkanı sunulmaktadır. Havale/EFT ile yapılan ödemelerde ekstra %5 indirim sepetinizde otomatik olarak uygulanır.",
+    returnPolicyText: "14 gün içinde koşulsuz şartsız iade hakkınız bulunmaktadır. Ürünün orijinal kutusunun hasar görmemiş olması gerekmektedir."
 };
 
 async function initSettings() {
@@ -71,6 +75,14 @@ app.use(async (req, res, next) => {
 app.use((req, res, next) => {
     if (adminSettings.maintenanceMode && !req.path.startsWith('/admin') && !req.path.startsWith('/css') && !req.path.startsWith('/images') && !req.path.startsWith('/js')) {
         return res.render('bakim', { settings: adminSettings });
+    }
+    next();
+});
+
+// Parametre Doğrulama: Tüm URL'lerdeki :id değerinin sayı olduğundan emin ol
+app.param('id', (req, res, next, id) => {
+    if (!/^\d+$/.test(id)) {
+        return res.status(404).render('pages/error', { message: "Geçersiz veya hatalı bir kayıt ID'si girdiniz." });
     }
     next();
 });
@@ -780,7 +792,7 @@ app.post('/siparis/tamamla', async (req, res) => {
 app.get('/admin/ayarlar', (req, res) => res.render('admin/ayarlar', { settings: adminSettings, success: null }));
 
 app.post('/admin/ayarlar', async (req, res) => {
-    const { whatsapp, whatsappActive, instagram, instagramActive, facebook, facebookActive, twitter, twitterActive, youtube, youtubeActive, maintenanceMode } = req.body;
+    const { whatsapp, whatsappActive, instagram, instagramActive, facebook, facebookActive, twitter, twitterActive, youtube, youtubeActive, maintenanceMode, email, address } = req.body;
     if (whatsapp !== undefined) adminSettings.whatsapp = whatsapp.trim();
     adminSettings.whatsappActive = !!whatsappActive;
     if (instagram !== undefined) adminSettings.instagram = instagram.trim();
@@ -792,6 +804,10 @@ app.post('/admin/ayarlar', async (req, res) => {
     if (youtube !== undefined) adminSettings.youtube = youtube.trim();
     adminSettings.youtubeActive = !!youtubeActive;
     adminSettings.maintenanceMode = !!maintenanceMode;
+    if (email !== undefined) adminSettings.email = email.trim();
+    if (address !== undefined) adminSettings.address = address.trim();
+    if (req.body.paymentText !== undefined) adminSettings.paymentText = req.body.paymentText.trim();
+    if (req.body.returnPolicyText !== undefined) adminSettings.returnPolicyText = req.body.returnPolicyText.trim();
     
     try {
         await db.query("UPDATE site_settings SET config = $1", [adminSettings]);

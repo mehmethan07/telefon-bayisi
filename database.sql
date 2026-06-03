@@ -77,7 +77,7 @@ CREATE TABLE service_requests (
     device_model VARCHAR(100) NOT NULL,
     issue_type VARCHAR(100) NOT NULL,
     description TEXT,
-    status VARCHAR(50) DEFAULT 'Beklemede' CHECK (status IN ('Beklemede', 'Onarımda', 'Parça Bekleniyor', 'Tamamlandı', 'İptal')),
+    status VARCHAR(50) DEFAULT 'Beklemede' CHECK (status IN ('Beklemede', 'Onaylandı', 'Onarımda', 'Parça Bekleniyor', 'Tamamlandı', 'İptal')),
     request_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
 );
