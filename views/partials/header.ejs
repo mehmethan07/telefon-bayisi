@@ -24,7 +24,7 @@
 </head>
 <body>
 
-    <!-- Mobile Overlay (Point 6) -->
+    <!-- Mobil Menü Karartma -->
     <div class="mobile-menu-overlay"></div>
 
     <header class="main-header">
@@ -58,7 +58,7 @@
         </nav>
 
 
-        <!-- Right Actions Grouping (Point 1) -->
+        <!-- Sağ Bölüm Butonları -->
         <style>
             @media (max-width: 768px) { .header-contact-desktop { display: none !important; } }
         </style>
@@ -83,7 +83,7 @@
             const mainNav = document.querySelector('.main-nav');
             const overlay = document.querySelector('.mobile-menu-overlay');
 
-            // Scroll Effect (Point 5)
+            // Kaydırma Efekti (Header Arka Plan)
             window.addEventListener('scroll', () => {
                 if (window.scrollY > 20) {
                     header.classList.add('scrolled');
@@ -92,7 +92,7 @@
                 }
             });
 
-            // Mobile Menu Toggle & Click Outside (Point 6)
+            // Mobil Menü Aç/Kapat
             function toggleMenu() {
                 mainNav.classList.toggle('open');
                 overlay.classList.toggle('active');
@@ -110,7 +110,7 @@
             menuToggle.addEventListener('click', toggleMenu);
             overlay.addEventListener('click', toggleMenu);
 
-            // Cart Badge Animation (Point 7)
+            // Sepet Butonu Animasyonu
             window.animateCartBadge = function() {
                 const badge = document.getElementById('cartBadge');
                 if (badge) {

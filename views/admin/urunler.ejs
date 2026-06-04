@@ -15,7 +15,6 @@
         <div class="admin-main">
             <%- include('partials/topbar', { pageTitle: 'Ürün Yönetimi', pageIcon: 'fas fa-mobile-screen', badgeCount: products.length }) %>
 
-            <!-- #2 Toast -->
             <% if (typeof success !== 'undefined' && success) { %>
                 <div class="toast toast-success"><i class="fas fa-check-circle"></i> <%= success %></div>
             <% } %>
@@ -41,7 +40,6 @@
             </div>
 
             <% if (products.length === 0) { %>
-                <!-- #4 Empty State -->
                 <div class="empty-state">
                     <i class="fas fa-box-open"></i>
                     <h3>Henüz ürün eklenmemiş</h3>
@@ -221,7 +219,6 @@
             openModal('editModal');
         }
 
-        // #5 Client-side table search
         function filterTable(query) {
             const rows = document.querySelectorAll('#productTable tr');
             const q = query.toLowerCase();

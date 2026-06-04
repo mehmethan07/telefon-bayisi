@@ -65,10 +65,12 @@
             <% sepet.forEach(s => { %>
                 <div class="cart-item">
                     <div class="cart-item-img">
-                        <% if (s.item.image_url) { %>
+                        <% if (s.type === 'aksesuar' && s.item.icon) { %>
+                            <i class="<%= s.item.icon %>"></i>
+                        <% } else if (s.item.image_url) { %>
                             <img src="<%= s.item.image_url %>" alt="<%= s.item.name %>">
                         <% } else { %>
-                            <i class="<%= s.item.icon || 'fas fa-box' %>"></i>
+                            <i class="fas fa-box"></i>
                         <% } %>
                     </div>
                     <div class="cart-item-info">

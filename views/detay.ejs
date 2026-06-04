@@ -7,11 +7,6 @@
 .breadcrumb span { margin: 0 8px; font-size: 12px; }
 .breadcrumb .current { color: var(--text-main); font-weight: 500; }
 
-.gallery-thumbs { display: flex; gap: 10px; margin-top: 20px; }
-.thumb { width: 80px; height: 80px; border: 2px solid transparent; border-radius: 8px; cursor: pointer; transition: 0.2s; padding: 5px; background: white; }
-.thumb:hover { border-color: var(--border-color); }
-.thumb.active { border-color: var(--primary-accent); }
-.thumb img { width: 100%; height: 100%; object-fit: contain; }
 
 .detail-tabs { margin-top: 40px; border-bottom: 2px solid var(--border-color); display: flex; gap: 30px; }
 .tab-btn { background: none; border: none; font-size: 16px; font-weight: 600; color: var(--text-gray); cursor: pointer; padding-bottom: 12px; position: relative; font-family: 'Inter', sans-serif; transition: 0.3s; }
@@ -33,26 +28,16 @@
 
 <section class="detail-section">
     <div class="detail-grid">
-
-        <div class="detail-visual" style="display:flex; flex-direction:column; background:transparent; padding:0; border:none;">
+        <div class="detail-visual" style="background:transparent; padding:0; border:none;">
             <div style="background:var(--card-bg); padding:40px; border-radius:20px; border:1px solid var(--border-color); display:flex; justify-content:center; align-items:center; height:450px;">
-                <% if (item.image_url) { %>
-                    <img id="mainImage" src="<%= item.image_url %>" alt="<%= item.name %>" style="max-height:100%; object-fit:contain; transition:0.3s;">
-                <% } else if (item.icon) { %>
+                <% if (type === 'aksesuar' && item.icon) { %>
                     <i class="<%= item.icon %>" style="font-size:120px; color:var(--primary-accent);"></i>
+                <% } else if (item.image_url) { %>
+                    <img src="<%= item.image_url %>" alt="<%= item.name %>" style="max-height:100%; max-width:100%; object-fit:contain;">
                 <% } else { %>
                     <i class="fas fa-box-open" style="font-size:120px; color:var(--text-gray);"></i>
                 <% } %>
             </div>
-            
-            <% if (item.image_url) { %>
-            <div class="gallery-thumbs">
-                <div class="thumb active" onclick="changeImage(this)"><img src="<%= item.image_url %>" alt="Açı 1"></div>
-                <!-- Mocking extra angles -->
-                <div class="thumb" onclick="changeImage(this)"><img src="<%= item.image_url %>" style="transform:scaleX(-1);" alt="Açı 2"></div>
-                <div class="thumb" onclick="changeImage(this)"><img src="<%= item.image_url %>" style="filter:grayscale(100%);" alt="Açı 3"></div>
-            </div>
-            <% } %>
         </div>
 
         <div class="detail-info">
@@ -150,28 +135,9 @@
 </section>
 
 <script>
-function changeImage(el) {
-    document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
-    
-    const targetImageSrc = el.querySelector('img').src;
-    const targetTransform = el.querySelector('img').style.transform;
-    const targetFilter = el.querySelector('img').style.filter;
-    
-    const mainImg = document.getElementById('mainImage');
-    mainImg.style.opacity = 0;
-    setTimeout(() => {
-        mainImg.src = targetImageSrc;
-        mainImg.style.transform = targetTransform;
-        mainImg.style.filter = targetFilter;
-        mainImg.style.opacity = 1;
-    }, 200);
-}
-
 function openTab(evt, tabId) {
     document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(tb => tb.classList.remove('active'));
-    
     document.getElementById(tabId).classList.add('active');
     evt.currentTarget.classList.add('active');
 }

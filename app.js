@@ -79,7 +79,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// Parametre Doğrulama: Tüm URL'lerdeki :id değerinin sayı olduğundan emin ol
+
 app.param('id', (req, res, next, id) => {
     if (!/^\d+$/.test(id)) {
         return res.status(404).render('pages/error', { message: "Geçersiz veya hatalı bir kayıt ID'si girdiniz." });
@@ -115,18 +115,18 @@ app.get('/', async (req, res) => {
         const prodResult = await db.query("SELECT * FROM devices");
         const aksResult = await db.query("SELECT p.*, c.code as category_code, c.icon FROM accessories p JOIN categories c ON p.category_id = c.id");
         
-        const mockProducts = prodResult.rows;
-        const mockAksesuarlar = aksResult.rows;
+        const products = prodResult.rows;
+        const accessories = aksResult.rows;
         
-        const featuredProducts = mockProducts.filter(p => p.is_featured);
-        const featuredAksesuarlar = mockAksesuarlar.filter(a => a.is_featured);
+        const featuredProducts = products.filter(p => p.is_featured);
+        const featuredAksesuarlar = accessories.filter(a => a.is_featured);
         
         const data = { 
-            products: mockProducts, 
+            products: products, 
             featuredProducts: featuredProducts, 
             featuredAksesuarlar: featuredAksesuarlar,
-            aks: mockAksesuarlar,
-            aksesuarlar: mockAksesuarlar 
+            aks: accessories,
+            aksesuarlar: accessories 
         };
         res.render('index', data);
     } catch(err) {
@@ -233,18 +233,10 @@ app.post('/servis/kayit', async (req, res) => {
         const [firstName, ...lastNameArr] = customer_name.split(' ');
         const lastName = lastNameArr.join(' ') || '';
         
-        let custRes = await db.query("SELECT id FROM customers WHERE phone = $1", [phoneDigits || phone]);
-        let customerId;
-        if (custRes.rows.length === 0) {
-            const insCust = await db.query("INSERT INTO customers (first_name, last_name, phone, email) VALUES ($1, $2, $3, $4) RETURNING id", [firstName, lastName, phoneDigits || phone, email]);
-            customerId = insCust.rows[0].id;
-        } else {
-            customerId = custRes.rows[0].id;
-        }
-
-        await db.query(`INSERT INTO service_requests (customer_id, tracking_code, brand, device_model, issue_type, description) 
-                        VALUES ($1, $2, $3, $4, $5, $6)`, 
-                        [customerId, trackingCode, brand, device_model, issue_type, description]);
+        await db.query(
+            'CALL create_service_proc($1, $2, $3, $4, $5, $6, $7, $8, $9, NULL)',
+            [firstName, lastName, phoneDigits || phone, email || null, brand, device_model, issue_type, description || null, trackingCode]
+        );
                         
         res.render('servis-kayit', { success: true, trackingCode });
     } catch(err) {
@@ -403,8 +395,8 @@ app.get('/admin/dashboard', async (req, res) => {
         const aksCountRes = await db.query("SELECT COUNT(*) as count FROM accessories");
         const aksesuar_sayisi = parseInt(aksCountRes.rows[0].count);
 
-        const chartLabels = ['Ekim', 'Kasım', 'Aralık', 'Ocak', 'Şubat', 'Mart'];
-        const chartData = [125000, 180000, 250000, 140000, 210000, parseFloat(aylikKazanc) > 0 ? parseFloat(aylikKazanc) : 95000];
+        const chartLabels = [];
+        const chartData = [];
 
         const topBrandsRes = await db.query(`
             SELECT brand, SUM(sales) as sales FROM (
@@ -424,9 +416,7 @@ app.get('/admin/dashboard', async (req, res) => {
             ) AS combined_brands
             GROUP BY brand ORDER BY sales DESC LIMIT 3
         `);
-        const topBrands = topBrandsRes.rows.length > 0 ? topBrandsRes.rows : [
-            { brand: "APPLE", sales: 145 }, { brand: "SAMSUNG", sales: 98 }, { brand: "XIAOMI", sales: 64 }
-        ];
+        const topBrands = topBrandsRes.rows;
 
         const renderData = { 
             stats: {
@@ -531,6 +521,13 @@ app.post('/admin/urunler/:id/duzenle', async (req, res) => {
 app.post('/admin/urunler/:id/sil', async (req, res) => {
     try {
         await db.query("DELETE FROM devices WHERE id=$1", [req.params.id]);
+        await db.query(`
+            SELECT setval(
+                pg_get_serial_sequence('devices', 'id'),
+                COALESCE((SELECT MAX(id) FROM devices), 0) + 1,
+                false
+            )
+        `);
         res.redirect('/admin/urunler');
     } catch(err) {
         console.error(err); res.status(500).send("Sunucu Hatası");
@@ -637,6 +634,13 @@ app.post('/admin/aksesuarlar/:id/duzenle', async (req, res) => {
 app.post('/admin/aksesuarlar/:id/sil', async (req, res) => {
     try {
         await db.query("DELETE FROM accessories WHERE id=$1", [req.params.id]);
+        await db.query(`
+            SELECT setval(
+                pg_get_serial_sequence('accessories', 'id'),
+                COALESCE((SELECT MAX(id) FROM accessories), 0) + 1,
+                false
+            )
+        `);
         res.redirect('/admin/aksesuarlar');
     } catch(err) {
         console.error(err); res.status(500).send("Sunucu Hatası");
@@ -657,7 +661,12 @@ app.post('/sepet/ekle', async (req, res) => {
     const { type, id } = req.body;
     const backUrl = req.get('referer') || '/urunler';
     try {
-        const pRes = await db.query(type === 'urun' ? "SELECT * FROM devices WHERE id = $1" : "SELECT * FROM accessories WHERE id = $1", [id]);
+        const pRes = await db.query(
+            type === 'urun'
+                ? "SELECT * FROM devices WHERE id = $1"
+                : "SELECT p.*, c.icon, c.name as category, c.code as category_code FROM accessories p JOIN categories c ON p.category_id = c.id WHERE p.id = $1",
+            [id]
+        );
         if(pRes.rows.length > 0) {
             const item = pRes.rows[0];
             if (item.stock_status === 'Tükendi') {
@@ -753,18 +762,11 @@ app.post('/siparis/tamamla', async (req, res) => {
         const client = await db.pool.connect();
         try {
             await client.query('BEGIN');
-            let custRes = await client.query("SELECT id FROM customers WHERE phone = $1", [phoneDigits || phone]);
-            let customerId;
-            if (custRes.rows.length === 0) {
-                const insCust = await client.query("INSERT INTO customers (first_name, last_name, phone, email) VALUES ($1, $2, $3, $4) RETURNING id", [firstName, lastName, phoneDigits || phone, email]);
-                customerId = insCust.rows[0].id;
-            } else {
-                customerId = custRes.rows[0].id;
-            }
-
-            const insOrder = await client.query(`INSERT INTO orders (customer_id, tracking_code, payment_method, status, total_price) VALUES ($1, $2, $3, 'Beklemede', $4) RETURNING id`,
-                                                [customerId, trackingCode, payment_method, toplamFiyat]);
-            const orderId = insOrder.rows[0].id;
+            const procRes = await client.query(
+                'CALL create_order_proc($1, $2, $3, $4, $5, $6, NULL)',
+                [firstName, lastName, phoneDigits || phone, email || null, payment_method, trackingCode]
+            );
+            const orderId = procRes.rows[0].p_order_id;
 
             for (const s of req.session.sepet) {
                 await client.query(`INSERT INTO order_items (order_id, device_id, accessory_id, quantity, unit_price) VALUES ($1, $2, $3, $4, $5)`,
@@ -843,12 +845,10 @@ app.post('/siparis/sorgula', async (req, res) => {
         const reservation = orderRes.rows[0];
         const itemsRes = await db.query("SELECT oi.*, COALESCE(d.name, a.name) as name FROM order_items oi LEFT JOIN devices d ON oi.device_id = d.id LEFT JOIN accessories a ON oi.accessory_id = a.id WHERE oi.order_id = $1", [reservation.id]);
         
-        // Format to match EJS expectations
         reservation.items = itemsRes.rows.map(row => ({
             miktar: row.quantity,
             item: { name: row.name, price: row.unit_price }
         }));
-        // Format date string for EJS layout compatibility
         if (reservation.order_date) {
             const d = new Date(reservation.order_date);
             reservation.date = `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;

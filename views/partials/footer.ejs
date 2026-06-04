@@ -359,15 +359,12 @@
             window.scrollTo({ top: 0, behavior: "smooth" });
         });
 
-        // Skeleton Loading Simulation
         document.addEventListener("DOMContentLoaded", () => {
-            // Apply skeleton class to main elements temporarily for the aesthetic effect
             const cards = document.querySelectorAll('.product-card, .service-card, .acc-card');
             cards.forEach(card => card.classList.add('skeleton'));
-            
             setTimeout(() => {
                 cards.forEach(card => card.classList.remove('skeleton'));
-            }, 600); // 600ms fake loading for visual feedback
+            }, 600);
         });
 
         function showCustomConfirm(options = {}) {
@@ -467,8 +464,7 @@
                     
                     const data = await response.json();
                     
-                    if (data.success) {
-                        // Update cart badge
+                        if (data.success) {
                         let badge = document.getElementById('cartBadge');
                         if (!badge) {
                             const cartBtn = document.getElementById('headerCartBtn');
@@ -477,8 +473,6 @@
                         } else {
                             badge.textContent = data.cartCount;
                         }
-                        
-                        // Bounce animation
                         if(badge) {
                             badge.style.transform = 'scale(1.5)';
                             setTimeout(() => badge.style.transform = 'scale(1)', 300);

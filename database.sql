@@ -1,7 +1,6 @@
--- Telefon Bayisi Veritabanı (VTYS Projesi için)
--- Normalizasyon (5N) kurallarına uygun tasarlanmıştır.
+-- Telefon Bayisi Veritabani
 
--- 1. TABLOLAR VE KISITLAMALAR (PK, FK, Unique, Check, Default)
+-- 1. TABLOLAR
 
 CREATE TABLE categories (
     id SERIAL PRIMARY KEY,
@@ -11,6 +10,25 @@ CREATE TABLE categories (
     icon VARCHAR(100) DEFAULT 'fas fa-plug',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+INSERT INTO categories (id, name, code, description, icon) VALUES
+(1, 'Akıllı Telefon', 'telefon', 'Son teknoloji akıllı telefonlar', 'fas fa-mobile-screen'),
+(2, 'Kılıf & Koruma', 'kilif', 'Telefon kılıfları ve ekran koruyucular', 'fas fa-shield-halved'),
+(3, 'Şarj & Kablo', 'sarj', 'Adaptörler ve şarj kabloları', 'fas fa-bolt'),
+(4, 'Ses & Kulaklık', 'kulaklik', 'Kulak içi ve kulak üstü kulaklıklar', 'fas fa-headphones'),
+(5, 'Akıllı Saat', 'saat', 'Akıllı saatler ve bileklikler', 'fas fa-watch'),
+(6, 'Tablet', 'tablet', 'Tablet bilgisayarlar', 'fas fa-tablet-screen-button'),
+(7, 'Yedek Parça', 'yedek_parca', 'Ekran, batarya gibi yedek parçalar', 'fas fa-microchip'),
+(8, 'Hafıza & Depolama', 'depolama', 'Hafıza kartları ve USB bellekler', 'fas fa-memory'),
+(9, 'Araç İçi Aksesuar', 'arac_ici', 'Araç şarj cihazları ve tutucular', 'fas fa-car'),
+(10, 'Powerbank', 'powerbank', 'Taşınabilir şarj cihazları', 'fas fa-battery-full')
+ON CONFLICT (id) DO UPDATE SET
+    name = EXCLUDED.name,
+    code = EXCLUDED.code,
+    description = EXCLUDED.description,
+    icon = EXCLUDED.icon;
+
+SELECT setval(pg_get_serial_sequence('categories', 'id'), COALESCE((SELECT MAX(id) FROM categories), 0) + 1, false);
 
 CREATE TABLE devices (
     id SERIAL PRIMARY KEY,
@@ -92,52 +110,29 @@ CREATE TABLE messages (
     sent_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 1.1 MEVCUT VERITABANI ICIN MIGRATION (Idempotent)
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'devices_stock_status_check') THEN
-        ALTER TABLE devices ADD CONSTRAINT devices_stock_status_check
-        CHECK (stock_status IN ('Stokta', 'Azalıyor', 'Tükendi'));
-    END IF;
+CREATE TABLE admins (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL
+);
 
-    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'accessories_stock_status_check') THEN
-        ALTER TABLE accessories ADD CONSTRAINT accessories_stock_status_check
-        CHECK (stock_status IN ('Stokta', 'Azalıyor', 'Tükendi'));
-    END IF;
+INSERT INTO admins (username, password) VALUES ('admin', 'admin') ON CONFLICT DO NOTHING;
 
-    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'orders_tracking_code_check') THEN
-        ALTER TABLE orders ADD CONSTRAINT orders_tracking_code_check
-        CHECK (tracking_code ~ '^SP-[0-9]{6}$');
-    END IF;
 
-    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'orders_payment_method_check') THEN
-        ALTER TABLE orders ADD CONSTRAINT orders_payment_method_check
-        CHECK (payment_method IN ('Kredi Kartı', 'Nakit', 'Havale/EFT'));
-    END IF;
+-- 2. INDEKSLER
 
-    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'service_requests_tracking_code_check') THEN
-        ALTER TABLE service_requests ADD CONSTRAINT service_requests_tracking_code_check
-        CHECK (tracking_code ~ '^SRV-[0-9]{6}$');
-    END IF;
-
-    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'service_requests_status_check') THEN
-        ALTER TABLE service_requests ADD CONSTRAINT service_requests_status_check
-        CHECK (status IN ('Beklemede', 'Onarımda', 'Parça Bekleniyor', 'Tamamlandı', 'İptal'));
-    END IF;
-END
-$$;
-
--- 2. İNDEKSLER (INDEX)
--- Sorguları hızlandırmak için sık aranan sütunlara indeks ekliyoruz.
 CREATE INDEX idx_devices_brand ON devices(brand);
 CREATE INDEX idx_accessories_brand ON accessories(brand);
 CREATE INDEX idx_orders_tracking ON orders(tracking_code);
 CREATE INDEX idx_customers_phone ON customers(phone);
+CREATE INDEX idx_service_requests_tracking ON service_requests(tracking_code);
+CREATE INDEX idx_order_items_order ON order_items(order_id);
 
--- 3. GÖRÜNÜMLER (VIEW)
--- Raporlamayı kolaylaştırmak için sipariş detaylarını müşteri bilgileriyle birleştiren view
+
+-- 3. GORUNUMLER (VIEW)
+
 CREATE OR REPLACE VIEW order_details_view AS
-SELECT 
+SELECT
     o.id AS order_id,
     o.tracking_code,
     c.first_name || ' ' || c.last_name AS customer_full_name,
@@ -151,9 +146,8 @@ JOIN customers c ON o.customer_id = c.id
 LEFT JOIN order_items oi ON o.id = oi.order_id
 GROUP BY o.id, c.first_name, c.last_name, c.phone;
 
--- Ürünlerin (cihaz ve aksesuar) kategori bazlı stok istatistiklerini gösteren View
 CREATE OR REPLACE VIEW category_stock_view AS
-SELECT 
+SELECT
     c.name AS category_name,
     COUNT(p.id) AS product_count,
     SUM(CASE WHEN p.stock_status = 'Stokta' THEN 1 ELSE 0 END) AS in_stock,
@@ -166,8 +160,8 @@ LEFT JOIN (
 ) p ON c.id = p.category_id
 GROUP BY c.name;
 
--- 4. TETİKLEYİCİLER VE FONKSİYONLAR (TRIGGER)
--- Sipariş kalemleri (order_items) eklendiğinde siparişin (orders) total_price değerini otomatik güncelleyen trigger
+
+-- 4. TRIGGER FONKSIYONLARI VE TETIKLEYICILER
 
 CREATE OR REPLACE FUNCTION update_order_total()
 RETURNS TRIGGER AS $$
@@ -188,8 +182,25 @@ AFTER INSERT OR UPDATE OR DELETE ON order_items
 FOR EACH ROW
 EXECUTE FUNCTION update_order_total();
 
+
+CREATE OR REPLACE FUNCTION log_service_status_change()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF OLD.status IS DISTINCT FROM NEW.status THEN
+        RAISE NOTICE 'Servis #% durumu degisti: % --> %', NEW.id, OLD.status, NEW.status;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_service_status_log
+AFTER UPDATE OF status ON service_requests
+FOR EACH ROW
+EXECUTE FUNCTION log_service_status_change();
+
+
 -- 5. SAKLI YORDAMLAR (STORED PROCEDURE)
--- Yeni bir sipariş oluşturmak için (Müşteri yoksa ekler, varsa kullanır)
+
 CREATE OR REPLACE PROCEDURE create_order_proc(
     p_first_name VARCHAR,
     p_last_name VARCHAR,
@@ -204,67 +215,50 @@ AS $$
 DECLARE
     v_customer_id INTEGER;
 BEGIN
-    -- Müşteri var mı kontrol et
     SELECT id INTO v_customer_id FROM customers WHERE phone = p_phone;
-    
-    -- Yoksa oluştur
+
     IF v_customer_id IS NULL THEN
         INSERT INTO customers (first_name, last_name, phone, email)
         VALUES (p_first_name, p_last_name, p_phone, p_email)
         RETURNING id INTO v_customer_id;
     END IF;
-    
-    -- Siparişi oluştur
+
     INSERT INTO orders (customer_id, tracking_code, payment_method)
     VALUES (v_customer_id, p_tracking_code, p_payment_method)
     RETURNING id INTO p_order_id;
 END;
 $$;
 
+CREATE OR REPLACE PROCEDURE create_service_proc(
+    p_first_name VARCHAR,
+    p_last_name VARCHAR,
+    p_phone VARCHAR,
+    p_email VARCHAR,
+    p_brand VARCHAR,
+    p_device_model VARCHAR,
+    p_issue_type VARCHAR,
+    p_description TEXT,
+    p_tracking_code VARCHAR,
+    OUT p_service_id INTEGER
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_customer_id INTEGER;
+BEGIN
+    SELECT id INTO v_customer_id FROM customers WHERE phone = p_phone;
 
--- 6. ÖRNEK VERİLER (Minimum 10 Dummy Data)
+    IF v_customer_id IS NULL THEN
+        INSERT INTO customers (first_name, last_name, phone, email)
+        VALUES (p_first_name, p_last_name, p_phone, p_email)
+        RETURNING id INTO v_customer_id;
+    END IF;
 
--- Kategoriler (10)
-INSERT INTO categories (name, code, description, icon) VALUES
-('Akıllı Telefon', 'telefon', 'Son teknoloji akıllı telefonlar', 'fas fa-mobile-screen'),
-('Kılıf & Koruma', 'kilif', 'Telefon kılıfları ve ekran koruyucular', 'fas fa-shield-halved'),
-('Şarj & Kablo', 'sarj', 'Adaptörler ve şarj kabloları', 'fas fa-bolt'),
-('Ses & Kulaklık', 'kulaklik', 'Kulak içi ve kulak üstü kulaklıklar', 'fas fa-headphones'),
-('Akıllı Saat', 'saat', 'Akıllı saatler ve bileklikler', 'fas fa-watch'),
-('Tablet', 'tablet', 'Tablet bilgisayarlar', 'fas fa-tablet-screen-button'),
-('Yedek Parça', 'yedek_parca', 'Ekran, batarya gibi yedek parçalar', 'fas fa-microchip'),
-('Hafıza & Depolama', 'depolama', 'Hafıza kartları ve USB bellekler', 'fas fa-memory'),
-('Araç İçi Aksesuar', 'arac_ici', 'Araç şarj cihazları ve tutucular', 'fas fa-car'),
-('Powerbank', 'powerbank', 'Taşınabilir şarj cihazları', 'fas fa-battery-full');
+    INSERT INTO service_requests (customer_id, tracking_code, brand, device_model, issue_type, description)
+    VALUES (v_customer_id, p_tracking_code, p_brand, p_device_model, p_issue_type, p_description)
+    RETURNING id INTO p_service_id;
+END;
+$$;
 
--- Cihazlar (3)
-INSERT INTO devices (category_id, name, brand, price, stock_status, is_featured) VALUES
-(1, 'iPhone 15 Pro', 'APPLE', 74999.00, 'Stokta', TRUE),
-(1, 'Galaxy S24 Ultra', 'SAMSUNG', 69999.00, 'Stokta', TRUE),
-(1, 'Redmi Note 13 Pro', 'XIAOMI', 18499.00, 'Azalıyor', FALSE);
 
--- Aksesuarlar (7)
-INSERT INTO accessories (category_id, name, brand, price, stock_status, is_featured) VALUES
-(2, 'Apple Silikon Kılıf', 'APPLE', 899.00, 'Stokta', TRUE),
-(3, '20W USB-C Güç Adaptörü', 'APPLE', 549.00, 'Stokta', FALSE),
-(4, 'AirPods Pro 2', 'APPLE', 7499.00, 'Stokta', TRUE),
-(3, 'Samsung 45W Şarj Aleti', 'SAMSUNG', 699.00, 'Tükendi', FALSE),
-(2, 'Spigen Zırhlı Kılıf', 'SPIGEN', 449.00, 'Stokta', FALSE),
-(3, 'Type-C Örgü Kablo', 'BASEUS', 199.00, 'Stokta', FALSE),
-(5, 'Galaxy Watch 6', 'SAMSUNG', 5999.00, 'Stokta', TRUE);
-
--- DEMO VERİLERİ (müşteri/sipariş/servis/mesaj) KALDIRILDI
--- Kategori ve ürünler seed edilir; müşteri/sipariş/servis/mesaj verileri uygulama üzerinden oluşturulur.
-
--- Admin Kullanıcısı (Sadece 1 adet)
-CREATE TABLE admins (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL
-);
-
--- Varsayılan admin (123456) hashli seed, varsa tekrar eklemez
-INSERT INTO admins (username, password)
-VALUES ('admin', '$2b$12$4sWztVX1vYU2bFT67iI.neE7i93H2rdW8brIHLsrvWPsmMSinJa12')
-ON CONFLICT (username) DO NOTHING;
-
+-- 6. TEST VERILERI

@@ -330,7 +330,7 @@ table {
 th, td { padding: 15px; text-align: left; border-bottom: 1px solid #f1f5f9; }
 th { background: #f8fafc; font-weight: 600; color: #475569; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
 td { color: #334155; font-size: 14px; }
-/* #14 Zebra + Hover */
+/* Zebra + Hover Tablo Satırları */
 tbody tr:nth-child(even) { background: #fafbfc; }
 tbody tr { transition: background 0.15s ease; }
 tbody tr:hover { background: #f0f9ff; }
