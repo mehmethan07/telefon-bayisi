@@ -1,44 +1,48 @@
-## DB'ye geçiş notları (Raporlar)
+## Veritabanı Geçiş Notları (Raporlar)
 
-Bu proje şu an in-memory veri tutuyor (`reservations` dizisi). Finans raporları da bu diziyi filtreleyip metrik üretiyor.
-PostgreSQL entegrasyonunda aynı mantık SQL sorgularına taşınacak.
+Projenin başında sipariş verilerini js dizisinde tutuyorduk ama sunucu kapanınca veriler sıfırlanıyordu.
+PostgreSQL'e geçerken aldığım notlar bunlar, sonra lazım olur diye buraya yazdım.
 
-### Önerilen tablo/alanlar
+### Tablolar nasıl olmalı
 
-#### orders (sipariş/ayırtma)
-- `id` (bigint / uuid)
-- `tracking_code` (text, **unique**)
-- `customer_name` (text)
-- `phone` (text) — **normalize edilmiş** (sadece rakam)
-- `email` (text, nullable)
-- `payment_method` (text)
-- `status` (text veya enum)
-- `created_at` (timestamp)
-- `total_price` (numeric)
+**orders:**
+- id (otomatik)
+- tracking_code → UNIQUE, SP- ile başlıyor
+- customer_name
+- phone → sadece rakam tutuyoruz normalizePhone ile
+- email → boş olabilir
+- payment_method
+- status
+- created_at
+- total_price (sayısal olmalı, string tutmak hata çıkardı)
 
-#### order_items
-- `id`
-- `order_id` (fk -> orders.id)
-- `type` (text: urun/aksesuar)
-- `item_id` (bigint)
-- `item_name` (text) — DB'de ürün tablosu varsa `product_id` ile tutulabilir
-- `brand_or_category` (text)
-- `unit_price` (numeric)
-- `quantity` (int)
+**order_items:**
+- id
+- order_id → orders.id'ye bağlı (FK)
+- type → 'urun' veya 'aksesuar'
+- item_id
+- item_name
+- brand_or_category
+- unit_price
+- quantity
 
-### Rapor sorgu karşılıkları (örnek)
+### Rapor sorguları
 
-- Tarih aralığı ve durum filtresi:
-  - `WHERE created_at BETWEEN :start AND :end`
-  - `AND status = :status` (status=all değilse)
-- Ciro:
-  - `SUM(total_price)` (status in 'Onaylandı','Teslime Hazır','Teslim Edildi' [+opsiyonel 'Beklemede'])
-- Günlük ciro:
-  - `GROUP BY DATE(created_at)`
-- Ürün/marka ciro kırılımı:
-  - `JOIN order_items` + `GROUP BY item_name` / `brand_or_category`
+Tarih filtresi için:
+- `WHERE created_at BETWEEN başlangıç AND bitiş`
+- durum filtresi: `AND status = 'Onaylandı'` (all seçilmezse)
 
-### Not
-- Şu anki formatlarda (`total_price` string, `date` string) geçici parse yapılıyor.
-  DB'ye geçince bunlar numeric/timestamp olacağı için raporlar daha sağlam ve hızlı çalışır.
+Ciro hesabı:
+- `SUM(total_price)` — sadece teslim edilen/onaylanan siparişler sayılacak
 
+Günlük kırılım:
+- `GROUP BY DATE(created_at)` ile çözüldü
+
+Ürün/marka bazlı kırılım:
+- order_items ile JOIN yapıp GROUP BY item_name veya brand_or_category
+
+### Dikkat edilecekler
+
+total_price dizi versiyonunda string tutuluyordu, parseFloat ile çeviriyorduk.
+DB'ye geçince numeric olduğu için bu sorun kalktı.
+Ayrıca tarihler de JS Date yerine timestamp olduğundan karşılaştırma çok daha kolay oldu.

@@ -228,7 +228,7 @@
             });
         }
 
-        // CSV Export Data
+        // CSV Dışa Aktar
         function exportToCSV() {
             const table = document.getElementById('productsDataTable');
             let csv = [];
@@ -253,7 +253,7 @@
                         // Görsel sütunu (td index: 2) CSV'ye girmez
                         if (j === 2) continue;
                     }
-                    // Sadece metni al, görselleri/butonları yoksay
+                    // Metin içeriğini al, görsel ve butonları atla
                     let cell = cols[j];
                     let text = '';
                     // Öne Çıkan sütunu CSV'de + olarak yazılsın
@@ -278,7 +278,7 @@
             document.body.removeChild(downloadLink);
         }
 
-        // Toplu Seçim (Bulk Select)
+        // Toplu seçim
         function toggleAllCheckboxes(source) {
             const checkboxes = document.querySelectorAll('.rowCheckbox');
             checkboxes.forEach(cb => {

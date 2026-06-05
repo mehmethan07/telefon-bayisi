@@ -19,7 +19,7 @@
             <div class="admin-main">
                 <%- include('partials/topbar', { pageTitle: 'Dashboard' , pageIcon: 'fas fa-chart-pie' }) %>
 
-                    <!-- Stok Uyarıları (Low Stock Alerts) -->
+                    <!-- Stok Uyarıları -->
                     <% if (typeof stokUyarilari !=='undefined' && stokUyarilari.length> 0) { %>
                         <div id="alerts"
                             style="background:#fef2f2; border:1px solid #fca5a5; border-radius:12px; padding:20px; margin-bottom:25px;">
@@ -114,7 +114,7 @@
                                 <!-- Sol Taraf: Grafik + Son Siparişler -->
                                 <div style="display:flex; flex-direction:column; gap:25px; flex:2;">
 
-                                    <!-- Chart.js Entegrasyonu -->
+                                    <!-- Ciro Grafiği -->
                                     <div class="list-section" style="padding:25px;">
                                         <h2 style="font-size:18px; margin-bottom:20px; color:var(--text-main);"><i
                                                 class="fas fa-chart-line"

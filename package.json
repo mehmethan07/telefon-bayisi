@@ -1,7 +1,7 @@
 {
   "name": "telefon-bayisi",
   "version": "1.0.0",
-  "description": "Profesyonel telefon satış ve teknik servis web uygulaması",
+  "description": "TBL331 Veritabani Yonetim Sistemleri - Donem Projesi",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
@@ -14,7 +14,7 @@
     "express",
     "ejs"
   ],
-  "author": "Ekip Çalışması",
+  "author": "mehmethan07",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^3.0.2",

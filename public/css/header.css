@@ -245,7 +245,7 @@
     visibility: visible;
 }
 
-/* Mobile Responsive */
+/* Mobil Uyum */
 @media (max-width: 768px) {
     .menu-toggle {
         display: flex;

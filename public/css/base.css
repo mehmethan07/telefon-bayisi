@@ -100,7 +100,7 @@ a {
     }
 }
 
-/* Skeleton Loading Animation */
+/* Yükleme İskeleti Animasyonu */
 .skeleton {
     background: #e2e8f0;
     position: relative;
@@ -129,7 +129,7 @@ a {
     100% { transform: translateX(100%); }
 }
 
-/* Page Transition Fade In */
+/* Sayfa Geçiş Animasyonu */
 @keyframes pageFadeIn {
     from {
         opacity: 0;

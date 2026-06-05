@@ -1,3 +1,4 @@
+// Gerekli modüller yükleniyor
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
@@ -5,6 +6,7 @@ const bcrypt = require('bcryptjs');
 const db = require('./db');
 const app = express();
 
+// Temel uygulama ayarları - firma adı ve port numarası
 const config = {
     name: "BAYİM",
     port: process.env.PORT || 8080
@@ -26,6 +28,8 @@ app.use(session({
     }
 }));
 
+// Güvenlik için sabit listeler - sadece bu değerlere izin veriyoruz
+// TODO: bunları ileride veritabanından çekmeyi düşünebiliriz
 const SERVICE_STATUS_WHITELIST = ['Beklemede', 'Onaylandı', 'Onarımda', 'Parça Bekleniyor', 'Tamamlandı', 'İptal'];
 const ORDER_STATUS_WHITELIST = ['Beklemede', 'Onaylandı', 'Teslime Hazır', 'Teslim Edildi', 'İptal Edildi'];
 
@@ -47,6 +51,8 @@ let adminSettings = {
     returnPolicyText: "14 gün içinde koşulsuz şartsız iade hakkınız bulunmaktadır. Ürünün orijinal kutusunun hasar görmemiş olması gerekmektedir."
 };
 
+// Uygulama başlarken veritabanından site ayarlarını yüklüyoruz
+// Eğer ayar kaydı yoksa varsayılan değerleri ekliyoruz
 async function initSettings() {
     try {
         await db.query(`CREATE TABLE IF NOT EXISTS site_settings (id SERIAL PRIMARY KEY, config JSONB NOT NULL)`);
@@ -71,7 +77,7 @@ app.use(async (req, res, next) => {
     next();
 });
 
-// Bakım Modu Koruması
+// Bakım modu aktifse admin dışındaki sayfalar bakim.ejs'i gösteriyor
 app.use((req, res, next) => {
     if (adminSettings.maintenanceMode && !req.path.startsWith('/admin') && !req.path.startsWith('/css') && !req.path.startsWith('/images') && !req.path.startsWith('/js')) {
         return res.render('bakim', { settings: adminSettings });
@@ -87,20 +93,25 @@ app.param('id', (req, res, next, id) => {
     next();
 });
 
+// Sipariş takip kodu üretici (SP-XXXXXX formatında)
 function generateTrackingCode() {
     const randomPart = Math.floor(100000 + Math.random() * 900000);
     return `SP-${randomPart}`;
 }
 
+// Telefon numarasını sadece rakamlardan oluşacak şekilde temizliyoruz
 function normalizePhone(phone) {
     return String(phone || '').replace(/\D/g, '');
 }
 
+// Servis takip kodu üretici (SRV-XXXXXX formatında)
 function generateServiceTrackingCode() {
     const randomPart = Math.floor(100000 + Math.random() * 900000);
     return `SRV-${randomPart}`;
 }
 
+// Veritabanında çakışma olmayan benzersiz bir takip kodu üretiyoruz
+// maxRetry deneme sınırı var, aşılırsa hata fırlatıyor
 async function generateUniqueTrackingCode(generator, tableName, maxRetry = 10) {
     for (let i = 0; i < maxRetry; i += 1) {
         const code = generator();
@@ -110,6 +121,7 @@ async function generateUniqueTrackingCode(generator, tableName, maxRetry = 10) {
     throw new Error(`${tableName} için benzersiz takip kodu üretilemedi`);
 }
 
+// Ana sayfa - öne çıkan ürün ve aksesuarları çekip gönderiyoruz
 app.get('/', async (req, res) => {
     try {
         const prodResult = await db.query("SELECT * FROM devices");
@@ -118,6 +130,7 @@ app.get('/', async (req, res) => {
         const products = prodResult.rows;
         const accessories = aksResult.rows;
         
+        // is_featured flag'ı true olanları filtrele
         const featuredProducts = products.filter(p => p.is_featured);
         const featuredAksesuarlar = accessories.filter(a => a.is_featured);
         
@@ -244,6 +257,7 @@ app.post('/servis/kayit', async (req, res) => {
     }
 });
 
+// Admin sayfaları için ortak middleware - stok uyarılarını sidebar'da göstermek için
 app.use('/admin', async (req, res, next) => {
     try {
         const prodRes = await db.query(`
@@ -260,7 +274,7 @@ app.use('/admin', async (req, res, next) => {
     }
 });
 
-// Admin Authentication Middleware
+// Oturum kontrolü - login dışındaki admin sayfalarını koru
 app.use('/admin', (req, res, next) => {
     if (req.path === '/login' || req.path === '/') return next();
     if (!req.session.adminId) {
@@ -283,6 +297,7 @@ app.post('/admin/login', async (req, res) => {
         const adminRes = await db.query("SELECT * FROM admins WHERE username = $1", [email]);
         if (adminRes.rows.length > 0) {
             const admin = adminRes.rows[0];
+            // Eski düz metin şifre mi yoksa bcrypt hash mi kontrol et
             const isBcryptHash = typeof admin.password === 'string' && admin.password.startsWith('$2');
             const isValid = isBcryptHash
                 ? await bcrypt.compare(password, admin.password)
@@ -292,6 +307,7 @@ app.post('/admin/login', async (req, res) => {
                 return res.render('admin/login', { error: 'Hatalı kullanıcı adı veya şifre!' });
             }
 
+            // Düz metin şifre varsa otomatik hash'e çevir (geçiş için)
             if (!isBcryptHash) {
                 const upgradedHash = await bcrypt.hash(password, 12);
                 await db.query("UPDATE admins SET password = $1 WHERE id = $2", [upgradedHash, admin.id]);
@@ -394,9 +410,45 @@ app.get('/admin/dashboard', async (req, res) => {
         
         const aksCountRes = await db.query("SELECT COUNT(*) as count FROM accessories");
         const aksesuar_sayisi = parseInt(aksCountRes.rows[0].count);
-
+        const monthNames = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
         const chartLabels = [];
         const chartData = [];
+        const monthMap = {};
+
+        for (let i = 5; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(1);
+            d.setMonth(d.getMonth() - i);
+            const m = d.getMonth();
+            const y = d.getFullYear();
+            const label = `${monthNames[m]} ${y}`;
+            const yearMonthStr = `${y}-${String(m + 1).padStart(2, '0')}`;
+            
+            chartLabels.push(label);
+            chartData.push(0);
+            monthMap[yearMonthStr] = chartLabels.length - 1;
+        }
+
+        try {
+            const ciroRes = await db.query(`
+                SELECT 
+                    TO_CHAR(order_date, 'YYYY-MM') AS year_month,
+                    SUM(total_price) AS sum
+                FROM orders
+                WHERE status = 'Onaylandı' 
+                  AND order_date >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '5 month'
+                GROUP BY TO_CHAR(order_date, 'YYYY-MM')
+                ORDER BY year_month ASC
+            `);
+
+            for (const row of ciroRes.rows) {
+                if (monthMap[row.year_month] !== undefined) {
+                    chartData[monthMap[row.year_month]] = parseFloat(row.sum || 0);
+                }
+            }
+        } catch (ciroErr) {
+            console.error("Ciro query error:", ciroErr);
+        }
 
         const topBrandsRes = await db.query(`
             SELECT brand, SUM(sales) as sales FROM (
@@ -521,6 +573,7 @@ app.post('/admin/urunler/:id/duzenle', async (req, res) => {
 app.post('/admin/urunler/:id/sil', async (req, res) => {
     try {
         await db.query("DELETE FROM devices WHERE id=$1", [req.params.id]);
+        // Silme sonrası sequence'ı sıfırlıyoruz - boşluk kalmasın diye
         await db.query(`
             SELECT setval(
                 pg_get_serial_sequence('devices', 'id'),
@@ -741,6 +794,7 @@ app.get('/siparis/tamamla', (req, res) => {
     res.render('ayirt', { sepet: req.session.sepet, toplam: toplamFiyat.toLocaleString('tr-TR'), success: false, trackingCode: null });
 });
 
+// Sipariş tamamlama - transaction içinde çalışıyor, hata olursa rollback yapıyor
 app.post('/siparis/tamamla', async (req, res) => {
     if (req.session.sepet.length === 0) return res.redirect('/sepet');
 
@@ -757,6 +811,7 @@ app.post('/siparis/tamamla', async (req, res) => {
 
     try {
         const trackingCode = await generateUniqueTrackingCode(generateTrackingCode, 'orders');
+        // İsim soyisim ayrıştırma - ilk kelime ad, geri kalanlar soyad
         const [firstName, ...lastNameArr] = customer_name.split(' ');
         const lastName = lastNameArr.join(' ') || '';
         const client = await db.pool.connect();
@@ -898,6 +953,8 @@ app.post('/admin/siparisler/:id/durum', async (req, res) => {
     }
 });
 
+// Raporlar sayfası - tarih filtresi, durum filtresi ve CSV export destekli
+// TODO: çok fazla tekrar var burada, ileride bir yardımcı fonksiyona alınabilir
 app.get('/admin/raporlar', async (req, res) => {
     try {
         let dateClauses = [];
@@ -1013,12 +1070,12 @@ app.get('/admin/raporlar', async (req, res) => {
 
         const topProductsRes = await db.query(`
             SELECT name, SUM(sales) as sales FROM (
-                SELECT d.name, SUM(oi.quantity) as sales 
+                SELECT d.name, SUM(oi.quantity * oi.unit_price) as sales 
                 ${orderItemsJoin} JOIN devices d ON oi.device_id = d.id 
                 ${mainWhere.replace(/status /g, 'o.status ').replace(/order_date/g, 'o.order_date')}
                 GROUP BY d.name
                 UNION ALL
-                SELECT a.name, SUM(oi.quantity) as sales 
+                SELECT a.name, SUM(oi.quantity * oi.unit_price) as sales 
                 ${orderItemsJoin} JOIN accessories a ON oi.accessory_id = a.id 
                 ${mainWhere.replace(/status /g, 'o.status ').replace(/order_date/g, 'o.order_date')}
                 GROUP BY a.name
@@ -1029,12 +1086,12 @@ app.get('/admin/raporlar', async (req, res) => {
 
         const topBrandsRes = await db.query(`
             SELECT brand, SUM(sales) as sales FROM (
-                SELECT d.brand, SUM(oi.quantity) as sales 
+                SELECT d.brand, SUM(oi.quantity * oi.unit_price) as sales 
                 ${orderItemsJoin} JOIN devices d ON oi.device_id = d.id 
                 ${mainWhere.replace(/status /g, 'o.status ').replace(/order_date/g, 'o.order_date')}
                 GROUP BY d.brand
                 UNION ALL
-                SELECT a.brand, SUM(oi.quantity) as sales 
+                SELECT a.brand, SUM(oi.quantity * oi.unit_price) as sales 
                 ${orderItemsJoin} JOIN accessories a ON oi.accessory_id = a.id 
                 ${mainWhere.replace(/status /g, 'o.status ').replace(/order_date/g, 'o.order_date')}
                 GROUP BY a.brand
@@ -1178,6 +1235,7 @@ app.get('/admin/raporlar.csv', async (req, res) => {
     }
 });
 
+// Statik sayfalar
 app.get('/hakkimizda', (req, res) => res.render('hakkimizda', { firma_adi: config.name }));
 
 app.get('/iletisim', (req, res) => res.render('iletisim', { firma_adi: config.name, success: false }));
@@ -1225,6 +1283,8 @@ app.get('/aksesuarlar/:id', async (req, res) => {
     }
 });
 
+// 404 handler - bulunamayan sayfalar için
 app.use((req, res) => res.status(404).render('pages/error', { firma_adi: config.name, message: "Aradığınız sayfa bulunamadı." }));
 
+// Sunucuyu başlat
 app.listen(config.port, () => console.log(`Server dinleniyor: http://localhost:${config.port}`));

@@ -306,7 +306,7 @@
             handleIconSelection('edit');
         });
 
-        // CSV Export Data
+        // CSV Dışa Aktar
         function exportToCSV() {
             const table = document.getElementById('aksesuarDataTable');
             let csv = [];
@@ -348,7 +348,7 @@
             document.body.removeChild(downloadLink);
         }
 
-        // Toplu Seçim (Bulk Select)
+        // Toplu seçim
         function toggleAllCheckboxes(source) {
             const checkboxes = document.querySelectorAll('.rowCheckbox');
             checkboxes.forEach(cb => { cb.checked = source.checked; });

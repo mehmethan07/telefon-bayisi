@@ -165,7 +165,7 @@ function applySort() {
     });
 
     cards.forEach(card => grid.appendChild(card));
-    grid.appendChild(noResults); // keep no-results at the end
+    grid.appendChild(noResults);
 }
 
 function clearFilters() {
@@ -178,9 +178,7 @@ function clearFilters() {
     applyFilters();
 }
 
-// Attach live search to input
 document.getElementById('searchInput').addEventListener('input', applyFilters);
-// Attach live filter to checkboxes
 document.querySelectorAll('.brand-filter, #stock-filter').forEach(el => el.addEventListener('change', applyFilters));
 </script>
 

@@ -1,3 +1,4 @@
+// PostgreSQL bağlantı havuzu - .env dosyasındaki değişkenlerden okuyor
 const { Pool } = require('pg');
 require('dotenv').config();
 
